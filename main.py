@@ -4,6 +4,7 @@ import pandas as pd
 import gspread
 from playwright.sync_api import sync_playwright
 
+
 def run_bot() -> str:
     password = os.getenv("BBB_PASSWORD")
     if not password:
