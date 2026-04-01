@@ -1,0 +1,24 @@
+name: Daily BBB Report
+on:
+  schedule:
+    - cron: '0 18 * * *' # Запуск в 00:00 по времени Астаны (это 18:00 UTC)
+  workflow_dispatch: # Позволяет запускать бота вручную кнопкой
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - name: Install dependencies
+        run: |
+          pip install playwright gspread pandas
+          playwright install chromium
+      - name: Run bot
+        run: python main.py
+        env:
+          GOOGLE_JSON: ${{ secrets.GOOGLE_JSON }}
+          BBB_PASSWORD: ${{ secrets.BBB_PASSWORD }}
