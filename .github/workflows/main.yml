@@ -28,9 +28,13 @@ jobs:
           BBB_PASSWORD: ${{ secrets.BBB_PASSWORD }}
 
       # Сохраняет скриншот если бот упал — для отладки селекторов
-      - name: Upload debug screenshot
-        if: failure()
+      - name: Upload debug artifacts
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: debug-screenshot
-          path: debug_screenshot.png
+          name: debug
+          path: |
+            debug_login_page.png
+            debug_login_page.html
+            debug_meetings.png
+            debug_screenshot.png
