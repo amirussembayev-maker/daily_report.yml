@@ -22,11 +22,44 @@ def run_bot() -> str:
         page.goto("https://biggerbluebutton.com/rooms/sessions/sign_in",
                   wait_until="networkidle", timeout=30000)
 
-        page.fill('input[placeholder="Email/Account Number"]', "260401190051930")
-        print("BOT: Логин введён.")
+        # Диагностика: сохраняем скриншот и HTML сразу после загрузки
+        print(f"BOT: URL = {page.url}")
+        print(f"BOT: Title = {page.title()}")
+        page.screenshot(path="debug_login_page.png", full_page=True)
+        with open("debug_login_page.html", "w", encoding="utf-8") as f:
+            f.write(page.content())
+        print("BOT: Скриншот и HTML сохранены.")
 
-        page.fill('input[placeholder="Password"]', password)
-        print("BOT: Пароль введён.")
+        # Ищем все input-поля на странице и выводим их атрибуты
+        inputs = page.query_selector_all("input")
+        print(f"BOT: Найдено input-полей: {len(inputs)}")
+        for i, inp in enumerate(inputs):
+            t = inp.get_attribute("type")
+            n = inp.get_attribute("name")
+            ph = inp.get_attribute("placeholder")
+            iid = inp.get_attribute("id")
+            print(f"  input[{i}]: type={t}, name={n}, placeholder={ph}, id={iid}")
+
+        # Пробуем заполнить первое видимое текстовое поле
+        filled = False
+        for inp in inputs:
+            t = inp.get_attribute("type") or "text"
+            if t in ("text", "email") and inp.is_visible():
+                inp.fill("260401190051930")
+                print(f"BOT: Логин введён в поле type={t}")
+                filled = True
+                break
+
+        if not filled:
+            browser.close()
+            raise RuntimeError("Не найдено поле для логина! Смотри debug_login_page.png и debug_login_page.html")
+
+        # Пробуем заполнить поле пароля
+        for inp in inputs:
+            if inp.get_attribute("type") == "password" and inp.is_visible():
+                inp.fill(password)
+                print("BOT: Пароль введён.")
+                break
 
         page.click('button:has-text("SIGN IN")')
         page.wait_for_load_state("networkidle", timeout=20000)
