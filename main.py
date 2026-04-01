@@ -22,11 +22,50 @@ def run_bot() -> str:
         page.goto("https://biggerbluebutton.com/rooms/sessions/sign_in",
                   wait_until="networkidle", timeout=30000)
 
-        page.fill('input[placeholder="Email/Account Number"]', "260401190051930")
-        print("BOT: Логин введён.")
+        # Ждём пока JS отрисует форму — ждём появления любого input
+        print("BOT: Жду появления формы...")
+        try:
+            page.wait_for_selector("input", timeout=15000)
+        except Exception:
+            page.screenshot(path="debug_login_page.png", full_page=True)
+            with open("debug_login_page.html", "w", encoding="utf-8") as f:
+                f.write(page.content())
+            raise RuntimeError("Форма не появилась за 15 секунд. Смотри debug_login_page.png")
 
-        page.fill('input[placeholder="Password"]', password)
-        print("BOT: Пароль введён.")
+        print(f"BOT: URL = {page.url}")
+        print(f"BOT: Title = {page.title()}")
+        page.screenshot(path="debug_login_page.png", full_page=True)
+        with open("debug_login_page.html", "w", encoding="utf-8") as f:
+            f.write(page.content())
+
+        # Выводим все input для диагностики
+        inputs = page.query_selector_all("input")
+        print(f"BOT: Найдено input-полей: {len(inputs)}")
+        for i, inp in enumerate(inputs):
+            print(f"  input[{i}]: type={inp.get_attribute('type')}, "
+                  f"name={inp.get_attribute('name')}, "
+                  f"placeholder={inp.get_attribute('placeholder')}, "
+                  f"id={inp.get_attribute('id')}")
+
+        # Заполняем первое видимое текстовое поле (логин)
+        filled = False
+        for inp in inputs:
+            t = inp.get_attribute("type") or "text"
+            if t in ("text", "email") and inp.is_visible():
+                inp.fill("260401190051930")
+                print(f"BOT: Логин введён (type={t})")
+                filled = True
+                break
+
+        if not filled:
+            raise RuntimeError("Поле логина не найдено даже после ожидания!")
+
+        # Заполняем поле пароля
+        for inp in inputs:
+            if inp.get_attribute("type") == "password" and inp.is_visible():
+                inp.fill(password)
+                print("BOT: Пароль введён.")
+                break
 
         page.click('button:has-text("SIGN IN")')
         page.wait_for_load_state("networkidle", timeout=20000)
