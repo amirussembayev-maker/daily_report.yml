@@ -22,14 +22,20 @@ def run_bot() -> str:
         page.goto("https://biggerbluebutton.com/rooms/sessions/sign_in",
                   wait_until="networkidle", timeout=30000)
 
-        page.fill('input[name="session[email]"]', "260401190051930")
-        page.fill('input[name="session[password]"]', password)
-        page.click('input[type="submit"], button[type="submit"]')
+        page.fill('input[placeholder="Email/Account Number"]', "260401190051930")
+        print("BOT: Логин введён.")
+
+        page.fill('input[placeholder="Password"]', password)
+        print("BOT: Пароль введён.")
+
+        page.click('button:has-text("SIGN IN")')
         page.wait_for_load_state("networkidle", timeout=20000)
+        print(f"BOT: После логина URL: {page.url}")
         print("BOT: Авторизация выполнена.")
 
         page.goto("https://biggerbluebutton.com/rooms/meetings",
                   wait_until="networkidle", timeout=30000)
+        page.screenshot(path="debug_meetings.png", full_page=True)
         print("BOT: Страница meetings загружена.")
 
         dashboard_selectors = [
@@ -63,7 +69,6 @@ def run_bot() -> str:
         print(f"BOT: Файл сохранён → {save_path}")
         browser.close()
         return save_path
-
 
 def update_sheets(file_path: str):
     print("--- СТАРТ РАБОТЫ ---")
