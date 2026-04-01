@@ -14,29 +14,44 @@ def run_bot() -> str:
     os.makedirs(download_dir, exist_ok=True)
 
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True, args=["--no-sandbox"])
-        context = browser.new_context(accept_downloads=True)
+        browser = p.chromium.launch(
+            headless=True,
+            args=["--no-sandbox", "--disable-blink-features=AutomationControlled"],
+        )
+        # Эмулируем настоящий браузер Chrome
+        context = browser.new_context(
+            accept_downloads=True,
+            user_agent=(
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                "AppleWebKit/537.36 (KHTML, like Gecko) "
+                "Chrome/122.0.0.0 Safari/537.36"
+            ),
+            viewport={"width": 1280, "height": 800},
+        )
         page = context.new_page()
 
         print("BOT: Открываю страницу логина...")
         page.goto("https://biggerbluebutton.com/rooms/sessions/sign_in",
-                  wait_until="networkidle", timeout=30000)
+                  wait_until="domcontentloaded", timeout=30000)
 
-        # Ждём пока JS отрисует форму — ждём появления любого input
+        # Ждём дополнительно 5 секунд для JS
+        page.wait_for_timeout(5000)
+
+        print(f"BOT: URL = {page.url}")
+        print(f"BOT: Title = {page.title()}")
+
+        # Сохраняем скриншот и HTML в любом случае
+        page.screenshot(path="debug_login_page.png", full_page=True)
+        with open("debug_login_page.html", "w", encoding="utf-8") as f:
+            f.write(page.content())
+        print("BOT: Скриншот и HTML сохранены.")
+
+        # Ждём появления input
         print("BOT: Жду появления формы...")
         try:
             page.wait_for_selector("input", timeout=15000)
         except Exception:
-            page.screenshot(path="debug_login_page.png", full_page=True)
-            with open("debug_login_page.html", "w", encoding="utf-8") as f:
-                f.write(page.content())
-            raise RuntimeError("Форма не появилась за 15 секунд. Смотри debug_login_page.png")
-
-        print(f"BOT: URL = {page.url}")
-        print(f"BOT: Title = {page.title()}")
-        page.screenshot(path="debug_login_page.png", full_page=True)
-        with open("debug_login_page.html", "w", encoding="utf-8") as f:
-            f.write(page.content())
+            raise RuntimeError("Форма не появилась. Смотри debug_login_page.png и .html")
 
         # Выводим все input для диагностики
         inputs = page.query_selector_all("input")
@@ -58,7 +73,7 @@ def run_bot() -> str:
                 break
 
         if not filled:
-            raise RuntimeError("Поле логина не найдено даже после ожидания!")
+            raise RuntimeError("Поле логина не найдено!")
 
         # Заполняем поле пароля
         for inp in inputs:
