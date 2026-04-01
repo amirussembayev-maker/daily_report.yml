@@ -30,7 +30,7 @@ def update_sheets(file_path):
     # Авторизация в Google через секрет
     service_account_info = json.loads(os.getenv("GOOGLE_JSON"))
     gc = gspread.service_account_from_dict(service_account_info)
-    sh = gc.open_by_key("ID_ВАШЕЙ_ТАБЛИЦЫ")
+    sh = gc.open_by_key("1VNShaKqmrA7iRFxwFV2mp66pgZteWSzhADCQF58J48w")
 
     df = pd.read_csv(file_path)
     
