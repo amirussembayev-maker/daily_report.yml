@@ -1,5 +1,6 @@
 import os
 import json
+import requests
 import pandas as pd
 import gspread
 from playwright.sync_api import sync_playwright
@@ -13,6 +14,48 @@ def run_bot() -> str:
     download_dir = os.path.abspath("downloads")
     os.makedirs(download_dir, exist_ok=True)
 
+    # ── Шаг 1: Авторизация через HTTP (обходим anti-bot) ──────────────
+    print("BOT: Авторизуюсь через HTTP...")
+    session = requests.Session()
+    session.headers.update({
+        "User-Agent": (
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) "
+            "Chrome/122.0.0.0 Safari/537.36"
+        ),
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+        "Origin": "https://biggerbluebutton.com",
+        "Referer": "https://biggerbluebutton.com/login",
+    })
+
+    # Пробуем несколько вариантов API логина
+    login_endpoints = [
+        ("POST", "https://biggerbluebutton.com/api/v1/auth/login"),
+        ("POST", "https://biggerbluebutton.com/api/auth/login"),
+        ("POST", "https://biggerbluebutton.com/api/login"),
+        ("POST", "https://biggerbluebutton.com/auth/login"),
+    ]
+
+    login_data = {
+        "email": "260401190051930",
+        "password": password,
+    }
+
+    auth_cookies = None
+    for method, url in login_endpoints:
+        try:
+            resp = session.post(url, json=login_data, timeout=10)
+            print(f"BOT: {url} → {resp.status_code}")
+            if resp.status_code in (200, 201):
+                print(f"BOT: Ответ: {resp.text[:200]}")
+                auth_cookies = session.cookies.get_dict()
+                print(f"BOT: Куки: {list(auth_cookies.keys())}")
+                break
+        except Exception as e:
+            print(f"BOT: {url} → ошибка: {e}")
+
+    # ── Шаг 2: Открываем браузер с куками ─────────────────────────────
     with sync_playwright() as p:
         browser = p.chromium.launch(
             headless=True,
@@ -27,95 +70,98 @@ def run_bot() -> str:
             ),
             viewport={"width": 1280, "height": 800},
         )
+
+        # Добавляем куки от HTTP-сессии в браузер
+        if auth_cookies:
+            print(f"BOT: Добавляю {len(auth_cookies)} куки в браузер...")
+            for name, value in auth_cookies.items():
+                context.add_cookies([{
+                    "name": name,
+                    "value": value,
+                    "domain": "biggerbluebutton.com",
+                    "path": "/",
+                }])
+
         page = context.new_page()
 
+        # ── Шаг 3: Пробуем войти через браузер с медленным вводом ──────
         print("BOT: Открываю страницу логина...")
         page.goto("https://biggerbluebutton.com/login",
                   wait_until="domcontentloaded", timeout=30000)
         page.wait_for_timeout(3000)
-        page.screenshot(path="debug_login_page.png", full_page=True)
-        print(f"BOT: URL = {page.url}")
 
-        # Кликаем на вкладку Sign In
+        # Кликаем Sign In
         btn = page.query_selector("button:has-text('Sign In')")
         if btn:
             btn.click()
             page.wait_for_timeout(1500)
-            print("BOT: Кликнул на Sign In")
 
-        page.screenshot(path="debug_signin_tab.png", full_page=True)
-
-        # Ищем ВСЕ видимые input на странице
-        print("BOT: Ищу видимые поля...")
+        # Вводим логин медленно (имитируем человека)
+        inputs = page.query_selector_all("input")
         visible_text = None
         visible_pass = None
-
-        all_inputs = page.query_selector_all("input")
-        print(f"BOT: Всего input: {len(all_inputs)}")
-        for i, inp in enumerate(all_inputs):
+        for inp in inputs:
             t = inp.get_attribute("type") or "text"
-            iid = inp.get_attribute("id") or ""
-            visible = inp.is_visible()
-            print(f"  [{i}] type={t}, id={iid}, visible={visible}")
-            if visible and t in ("text", "email") and visible_text is None:
+            if inp.is_visible() and t in ("text", "email") and visible_text is None:
                 visible_text = inp
-            if visible and t == "password" and visible_pass is None:
+            if inp.is_visible() and t == "password" and visible_pass is None:
                 visible_pass = inp
 
-        if visible_text is None or visible_pass is None:
-            browser.close()
-            raise RuntimeError(
-                f"Не найдены видимые поля! text={visible_text}, pass={visible_pass}. "
-                "Смотри debug_signin_tab.png"
-            )
+        if visible_text and visible_pass:
+            visible_text.click()
+            page.wait_for_timeout(300)
+            # Печатаем посимвольно как человек
+            page.keyboard.type("260401190051930", delay=50)
+            print("BOT: Логин введён.")
 
-        visible_text.click()
-        visible_text.fill("260401190051930")
-        print("BOT: Логин введён.")
+            visible_pass.click()
+            page.wait_for_timeout(300)
+            page.keyboard.type(password, delay=50)
+            print("BOT: Пароль введён.")
 
-        visible_pass.click()
-        visible_pass.fill(password)
-        print("BOT: Пароль введён.")
+            page.wait_for_timeout(500)
+            page.click('button:has-text("SIGN IN")')
+            page.wait_for_load_state("networkidle", timeout=20000)
+            print(f"BOT: После логина URL: {page.url}")
 
-        page.screenshot(path="debug_before_submit.png")
-
-        # Нажимаем SIGN IN
-        page.click('button:has-text("SIGN IN")')
-        page.wait_for_load_state("networkidle", timeout=20000)
-        print(f"BOT: После логина URL: {page.url}")
         page.screenshot(path="debug_after_login.png", full_page=True)
 
-        if "login" in page.url:
-            with open("debug_after_login.html", "w", encoding="utf-8") as f:
-                f.write(page.content())
-            raise RuntimeError("Авторизация не прошла. Смотри debug_after_login.png")
+        # ── Шаг 4: Переходим на Meeting History ─────────────────────────
+        # Пробуем разные URL
+        for meetings_url in [
+            "https://biggerbluebutton.com/rooms/meetings",
+            "https://biggerbluebutton.com/meeting-history",
+            "https://biggerbluebutton.com/meetings",
+        ]:
+            page.goto(meetings_url, wait_until="networkidle", timeout=20000)
+            page.wait_for_timeout(2000)
+            current = page.url
+            print(f"BOT: {meetings_url} → {current}")
+            if "login" not in current and "403" not in page.title():
+                print("BOT: Страница meetings найдена!")
+                break
 
-        print("BOT: Авторизация выполнена.")
-
-        page.goto("https://biggerbluebutton.com/rooms/meetings",
-                  wait_until="networkidle", timeout=30000)
-        page.wait_for_timeout(3000)
         page.screenshot(path="debug_meetings.png", full_page=True)
         with open("debug_meetings.html", "w", encoding="utf-8") as f:
             f.write(page.content())
-        print(f"BOT: Meetings URL: {page.url}")
+        print(f"BOT: Итоговый URL meetings: {page.url}")
 
-        # Выводим все кнопки/ссылки для диагностики
+        # Выводим ссылки
         links = page.query_selector_all("a, button")
-        print(f"BOT: Найдено элементов: {len(links)}")
+        print(f"BOT: Элементов на странице: {len(links)}")
         for i, el in enumerate(links[:40]):
             txt = el.inner_text().strip()[:60]
             href = el.get_attribute("href") or ""
-            print(f"  [{i}] text='{txt}', href='{href}'")
+            print(f"  [{i}] '{txt}' href='{href}'")
 
+        # Ищем Report.CSV (видно на скриншоте!)
         dashboard_selectors = [
-            "a[href*='learning_dashboard']",
-            "button:has-text('Learning Dashboard')",
-            "a:has-text('Learning Dashboard')",
-            "button:has-text('Dashboard')",
-            "a:has-text('Dashboard')",
-            "[data-action*='download']",
+            "a:has-text('Report.CSV')",
+            "a:has-text('Report.csv')",
+            "a:has-text('report.csv')",
+            "a[href*='report']",
             "a[href*='csv']",
+            "a:has-text('Learning Dashboard')",
             "button:has-text('Download')",
             "a:has-text('Download')",
         ]
@@ -124,13 +170,13 @@ def run_bot() -> str:
         for sel in dashboard_selectors:
             elements = page.query_selector_all(sel)
             if elements:
-                download_link = elements[-1]
-                print(f"BOT: Найдена кнопка: {sel}")
+                download_link = elements[0]  # первая/последняя встреча
+                print(f"BOT: Найдена кнопка: {sel} ({len(elements)} шт.)")
                 break
 
         if download_link is None:
             browser.close()
-            raise RuntimeError("Кнопка не найдена. Смотри debug_meetings.png и debug_meetings.html")
+            raise RuntimeError("Кнопка Report.CSV не найдена. Смотри debug_meetings.png")
 
         print("BOT: Скачиваю...")
         with page.expect_download(timeout=30000) as dl_info:
