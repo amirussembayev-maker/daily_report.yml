@@ -2,8 +2,21 @@ name: Daily BBB Report
 
 on:
   schedule:
-    - cron: '0 18 * * *'
+    - cron: '0 4 * * *'
   workflow_dispatch:
+    inputs:
+      sync_mode:
+        description: 'daily | backfill | all'
+        required: true
+        default: 'backfill'
+      report_start_date:
+        description: 'YYYY-MM-DD, например 2026-03-01'
+        required: false
+        default: '2026-03-01'
+      report_end_date:
+        description: 'YYYY-MM-DD, например 2026-04-30'
+        required: false
+        default: '2026-04-30'
 
 jobs:
   build:
@@ -19,13 +32,35 @@ jobs:
       - name: Install dependencies
         run: |
           pip install playwright gspread pandas
-          playwright install chromium --with-deps  # ← ключевое исправление
+          playwright install chromium --with-deps
+
+      - name: Resolve sync settings
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            echo "SYNC_MODE=daily" >> "$GITHUB_ENV"
+            echo "REPORT_START_DATE=" >> "$GITHUB_ENV"
+            echo "REPORT_END_DATE=" >> "$GITHUB_ENV"
+          else
+            echo "SYNC_MODE=${{ github.event.inputs.sync_mode }}" >> "$GITHUB_ENV"
+            echo "REPORT_START_DATE=${{ github.event.inputs.report_start_date }}" >> "$GITHUB_ENV"
+            echo "REPORT_END_DATE=${{ github.event.inputs.report_end_date }}" >> "$GITHUB_ENV"
+          fi
 
       - name: Run bot
-        run: python main.py
+        run: python "Daily Report Main.py"
         env:
           GOOGLE_JSON: ${{ secrets.GOOGLE_JSON }}
           BBB_PASSWORD: ${{ secrets.BBB_PASSWORD }}
+          GOOGLE_SHEET_IELTS: ${{ secrets.GOOGLE_SHEET_IELTS }}
+          GOOGLE_SHEET_RTI: ${{ secrets.GOOGLE_SHEET_RTI }}
+          GOOGLE_SHEET_RTN: ${{ secrets.GOOGLE_SHEET_RTN }}
+          GOOGLE_SHEET_VIP: ${{ secrets.GOOGLE_SHEET_VIP }}
+          GOOGLE_SHEET_NUET: ${{ secrets.GOOGLE_SHEET_NUET }}
+          REPORT_TIMEZONE: Asia/Almaty
+          SYNC_MODE: ${{ env.SYNC_MODE }}
+          REPORT_START_DATE: ${{ env.REPORT_START_DATE }}
+          REPORT_END_DATE: ${{ env.REPORT_END_DATE }}
 
       - name: Upload debug artifacts
         if: always()
