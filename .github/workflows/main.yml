@@ -27,7 +27,6 @@ jobs:
           GOOGLE_JSON: ${{ secrets.GOOGLE_JSON }}
           BBB_PASSWORD: ${{ secrets.BBB_PASSWORD }}
 
-    
       - name: Upload debug artifacts
         if: always()
         uses: actions/upload-artifact@v4
