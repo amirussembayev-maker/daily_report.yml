@@ -18,7 +18,6 @@ def run_bot() -> str:
             headless=True,
             args=["--no-sandbox", "--disable-blink-features=AutomationControlled"],
         )
-        # Эмулируем настоящий браузер Chrome
         context = browser.new_context(
             accept_downloads=True,
             user_agent=(
@@ -30,28 +29,47 @@ def run_bot() -> str:
         )
         page = context.new_page()
 
-        print("BOT: Открываю страницу логина...")
-        page.goto("https://biggerbluebutton.com/rooms/sessions/sign_in",
+        # Открываем главную страницу
+        print("BOT: Открываю главную страницу...")
+        page.goto("https://biggerbluebutton.com/",
                   wait_until="domcontentloaded", timeout=30000)
-
-        # Ждём дополнительно 5 секунд для JS
-        page.wait_for_timeout(5000)
+        page.wait_for_timeout(3000)
 
         print(f"BOT: URL = {page.url}")
         print(f"BOT: Title = {page.title()}")
+        page.screenshot(path="debug_home.png", full_page=True)
 
-        # Сохраняем скриншот и HTML в любом случае
+        # Нажимаем кнопку LOGIN в правом верхнем углу
+        print("BOT: Ищу кнопку LOGIN...")
+        login_btn_selectors = [
+            "a:has-text('LOGIN')",
+            "a:has-text('Login')",
+            "a[href*='login']",
+            "a[href*='sign_in']",
+            "a[href*='signin']",
+            ".login",
+            "#login",
+        ]
+        clicked = False
+        for sel in login_btn_selectors:
+            el = page.query_selector(sel)
+            if el and el.is_visible():
+                print(f"BOT: Найдена кнопка логина: {sel}")
+                el.click()
+                page.wait_for_load_state("domcontentloaded", timeout=15000)
+                page.wait_for_timeout(3000)
+                clicked = True
+                break
+
+        if not clicked:
+            page.screenshot(path="debug_login_page.png", full_page=True)
+            browser.close()
+            raise RuntimeError("Кнопка LOGIN не найдена! Смотри debug_home.png")
+
+        print(f"BOT: После клика LOGIN — URL = {page.url}")
         page.screenshot(path="debug_login_page.png", full_page=True)
         with open("debug_login_page.html", "w", encoding="utf-8") as f:
             f.write(page.content())
-        print("BOT: Скриншот и HTML сохранены.")
-
-        # Ждём появления input
-        print("BOT: Жду появления формы...")
-        try:
-            page.wait_for_selector("input", timeout=15000)
-        except Exception:
-            raise RuntimeError("Форма не появилась. Смотри debug_login_page.png и .html")
 
         # Выводим все input для диагностики
         inputs = page.query_selector_all("input")
@@ -82,6 +100,7 @@ def run_bot() -> str:
                 print("BOT: Пароль введён.")
                 break
 
+        # Нажимаем SIGN IN
         page.click('button:has-text("SIGN IN")')
         page.wait_for_load_state("networkidle", timeout=20000)
         print(f"BOT: После логина URL: {page.url}")
