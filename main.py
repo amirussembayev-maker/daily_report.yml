@@ -18,7 +18,6 @@ def run_bot() -> str:
             headless=True,
             args=["--no-sandbox", "--disable-blink-features=AutomationControlled"],
         )
-        # Эмулируем настоящий браузер Chrome
         context = browser.new_context(
             accept_downloads=True,
             user_agent=(
@@ -30,74 +29,72 @@ def run_bot() -> str:
         )
         page = context.new_page()
 
+        # Открываем страницу логина напрямую
         print("BOT: Открываю страницу логина...")
-        page.goto("https://biggerbluebutton.com/rooms/sessions/sign_in",
+        page.goto("https://biggerbluebutton.com/login",
                   wait_until="domcontentloaded", timeout=30000)
-
-        # Ждём дополнительно 5 секунд для JS
-        page.wait_for_timeout(5000)
+        page.wait_for_timeout(3000)
 
         print(f"BOT: URL = {page.url}")
-        print(f"BOT: Title = {page.title()}")
-
-        # Сохраняем скриншот и HTML в любом случае
         page.screenshot(path="debug_login_page.png", full_page=True)
-        with open("debug_login_page.html", "w", encoding="utf-8") as f:
-            f.write(page.content())
-        print("BOT: Скриншот и HTML сохранены.")
 
-        # Ждём появления input
-        print("BOT: Жду появления формы...")
-        try:
-            page.wait_for_selector("input", timeout=15000)
-        except Exception:
-            raise RuntimeError("Форма не появилась. Смотри debug_login_page.png и .html")
+        # Заполняем по точным id
+        page.fill('#email', "260401190051930")
+        print("BOT: Логин введён.")
 
-        # Выводим все input для диагностики
-        inputs = page.query_selector_all("input")
-        print(f"BOT: Найдено input-полей: {len(inputs)}")
-        for i, inp in enumerate(inputs):
-            print(f"  input[{i}]: type={inp.get_attribute('type')}, "
-                  f"name={inp.get_attribute('name')}, "
-                  f"placeholder={inp.get_attribute('placeholder')}, "
-                  f"id={inp.get_attribute('id')}")
+        page.fill('#password', password)
+        print("BOT: Пароль введён.")
 
-        # Заполняем первое видимое текстовое поле (логин)
-        filled = False
-        for inp in inputs:
-            t = inp.get_attribute("type") or "text"
-            if t in ("text", "email") and inp.is_visible():
-                inp.fill("260401190051930")
-                print(f"BOT: Логин введён (type={t})")
-                filled = True
-                break
+        page.screenshot(path="debug_before_submit.png")
 
-        if not filled:
-            raise RuntimeError("Поле логина не найдено!")
-
-        # Заполняем поле пароля
-        for inp in inputs:
-            if inp.get_attribute("type") == "password" and inp.is_visible():
-                inp.fill(password)
-                print("BOT: Пароль введён.")
-                break
-
+        # Нажимаем кнопку входа
         page.click('button:has-text("SIGN IN")')
         page.wait_for_load_state("networkidle", timeout=20000)
+
         print(f"BOT: После логина URL: {page.url}")
+        page.screenshot(path="debug_after_login.png", full_page=True)
+
+        # Проверяем что авторизация прошла
+        if "login" in page.url:
+            with open("debug_after_login.html", "w", encoding="utf-8") as f:
+                f.write(page.content())
+            raise RuntimeError(
+                "Авторизация не прошла — остались на /login. "
+                "Смотри debug_after_login.png"
+            )
+
         print("BOT: Авторизация выполнена.")
 
+        # Переходим на страницу meetings
         page.goto("https://biggerbluebutton.com/rooms/meetings",
                   wait_until="networkidle", timeout=30000)
+        page.wait_for_timeout(3000)
         page.screenshot(path="debug_meetings.png", full_page=True)
+        print(f"BOT: Meetings URL: {page.url}")
         print("BOT: Страница meetings загружена.")
+
+        # Сохраняем HTML для анализа кнопок
+        with open("debug_meetings.html", "w", encoding="utf-8") as f:
+            f.write(page.content())
+
+        # Выводим все ссылки на странице для диагностики
+        links = page.query_selector_all("a, button")
+        print(f"BOT: Найдено ссылок/кнопок: {len(links)}")
+        for i, el in enumerate(links[:30]):  # первые 30
+            txt = el.inner_text().strip()[:50]
+            href = el.get_attribute("href") or ""
+            print(f"  [{i}] text='{txt}', href='{href}'")
 
         dashboard_selectors = [
             "a[href*='learning_dashboard']",
             "button:has-text('Learning Dashboard')",
             "a:has-text('Learning Dashboard')",
+            "button:has-text('Dashboard')",
+            "a:has-text('Dashboard')",
             "[data-action*='download']",
             "a[href*='csv']",
+            "button:has-text('Download')",
+            "a:has-text('Download')",
         ]
 
         download_link = None
@@ -109,9 +106,8 @@ def run_bot() -> str:
                 break
 
         if download_link is None:
-            page.screenshot(path="debug_screenshot.png", full_page=True)
             browser.close()
-            raise RuntimeError("Кнопка не найдена. Смотри debug_screenshot.png")
+            raise RuntimeError("Кнопка не найдена. Смотри debug_meetings.png и debug_meetings.html")
 
         print("BOT: Скачиваю...")
         with page.expect_download(timeout=30000) as dl_info:
