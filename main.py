@@ -29,7 +29,6 @@ def run_bot() -> str:
         )
         page = context.new_page()
 
-        # Открываем страницу логина напрямую
         print("BOT: Открываю страницу логина...")
         page.goto("https://biggerbluebutton.com/login",
                   wait_until="domcontentloaded", timeout=30000)
@@ -38,7 +37,29 @@ def run_bot() -> str:
         print(f"BOT: URL = {page.url}")
         page.screenshot(path="debug_login_page.png", full_page=True)
 
-        # Заполняем по точным id
+        # Кликаем на вкладку Sign In (на странице есть Sign In / Sign Up)
+        signin_tab_selectors = [
+            "button:has-text('Sign In')",
+            "a:has-text('Sign In')",
+            "li:has-text('Sign In')",
+            "[role='tab']:has-text('Sign In')",
+            "button:has-text('LOGIN')",
+            "button:has-text('Log In')",
+        ]
+        for sel in signin_tab_selectors:
+            el = page.query_selector(sel)
+            if el and el.is_visible():
+                print(f"BOT: Кликаю на вкладку: {sel}")
+                el.click()
+                page.wait_for_timeout(1000)
+                break
+
+        page.screenshot(path="debug_signin_tab.png", full_page=True)
+
+        # Ждём пока поле #email станет видимым
+        print("BOT: Жду поле email...")
+        page.wait_for_selector("#email:visible", timeout=10000)
+
         page.fill('#email', "260401190051930")
         print("BOT: Логин введён.")
 
@@ -47,40 +68,32 @@ def run_bot() -> str:
 
         page.screenshot(path="debug_before_submit.png")
 
-        # Нажимаем кнопку входа
+        # Нажимаем кнопку SIGN IN
         page.click('button:has-text("SIGN IN")')
         page.wait_for_load_state("networkidle", timeout=20000)
 
         print(f"BOT: После логина URL: {page.url}")
         page.screenshot(path="debug_after_login.png", full_page=True)
 
-        # Проверяем что авторизация прошла
         if "login" in page.url:
             with open("debug_after_login.html", "w", encoding="utf-8") as f:
                 f.write(page.content())
-            raise RuntimeError(
-                "Авторизация не прошла — остались на /login. "
-                "Смотри debug_after_login.png"
-            )
+            raise RuntimeError("Авторизация не прошла. Смотри debug_after_login.png")
 
         print("BOT: Авторизация выполнена.")
 
-        # Переходим на страницу meetings
         page.goto("https://biggerbluebutton.com/rooms/meetings",
                   wait_until="networkidle", timeout=30000)
         page.wait_for_timeout(3000)
         page.screenshot(path="debug_meetings.png", full_page=True)
-        print(f"BOT: Meetings URL: {page.url}")
-        print("BOT: Страница meetings загружена.")
-
-        # Сохраняем HTML для анализа кнопок
         with open("debug_meetings.html", "w", encoding="utf-8") as f:
             f.write(page.content())
+        print(f"BOT: Meetings URL: {page.url}")
 
-        # Выводим все ссылки на странице для диагностики
+        # Выводим ссылки для диагностики
         links = page.query_selector_all("a, button")
-        print(f"BOT: Найдено ссылок/кнопок: {len(links)}")
-        for i, el in enumerate(links[:30]):  # первые 30
+        print(f"BOT: Найдено элементов: {len(links)}")
+        for i, el in enumerate(links[:30]):
             txt = el.inner_text().strip()[:50]
             href = el.get_attribute("href") or ""
             print(f"  [{i}] text='{txt}', href='{href}'")
