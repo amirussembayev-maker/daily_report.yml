@@ -1,0 +1,1283 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Attendance Report Mockup</title>
+  <style>
+    :root {
+      --bg: #f3efe7;
+      --panel: #fffdf8;
+      --panel-2: #f8f4eb;
+      --line: #dccfb8;
+      --text: #1f2933;
+      --muted: #6b7280;
+      --accent: #0f5c5a;
+      --accent-2: #d17b49;
+      --accent-3: #f0c37a;
+      --danger: #b84d38;
+      --ok: #2f7d4d;
+      --shadow: 0 12px 28px rgba(53, 45, 31, 0.08);
+      --radius: 18px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Avenir Next", "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(240, 195, 122, 0.28), transparent 26%),
+        radial-gradient(circle at top right, rgba(15, 92, 90, 0.12), transparent 22%),
+        linear-gradient(180deg, #f8f4ec 0%, var(--bg) 100%);
+    }
+
+    .app {
+      display: grid;
+      grid-template-columns: 300px minmax(0, 1fr);
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      padding: 28px 22px;
+      border-right: 1px solid rgba(220, 207, 184, 0.8);
+      background: rgba(255, 253, 248, 0.85);
+      backdrop-filter: blur(10px);
+      position: sticky;
+      top: 0;
+      align-self: start;
+      height: 100vh;
+      overflow: auto;
+    }
+
+    .brand {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 28px;
+    }
+
+    .brand small,
+    .meta,
+    .muted {
+      color: var(--muted);
+    }
+
+    .brand h1,
+    .content h2,
+    .content h3,
+    .content h4 {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      letter-spacing: 0.01em;
+    }
+
+    .sidebar-section {
+      margin-bottom: 24px;
+    }
+
+    .sidebar-section h3 {
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+
+    .sheet-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .sheet-card {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      border-radius: 14px;
+      padding: 12px 14px;
+      box-shadow: var(--shadow);
+      cursor: pointer;
+      transition: transform 0.16s ease, border-color 0.16s ease;
+    }
+
+    .sheet-card:hover,
+    .sheet-card.active {
+      transform: translateY(-1px);
+      border-color: var(--accent-2);
+    }
+
+    .sheet-card strong,
+    .flow-card strong {
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 5px 10px;
+      font-size: 12px;
+      font-weight: 600;
+      background: #efe8d7;
+      color: #5a4733;
+    }
+
+    .tag.good {
+      background: #dfefe4;
+      color: var(--ok);
+    }
+
+    .tag.warn {
+      background: #f7e6d8;
+      color: var(--accent-2);
+    }
+
+    .tag.alert {
+      background: #f8dfda;
+      color: var(--danger);
+    }
+
+    .content {
+      padding: 28px;
+      overflow: auto;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: center;
+      margin-bottom: 22px;
+    }
+
+    .topbar .controls {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .control {
+      border: 1px solid var(--line);
+      background: rgba(255, 253, 248, 0.86);
+      color: var(--text);
+      border-radius: 999px;
+      padding: 10px 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .control.active {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+    }
+
+    .hero {
+      border: 1px solid var(--line);
+      background: linear-gradient(135deg, rgba(255, 253, 248, 0.94), rgba(248, 244, 235, 0.96));
+      border-radius: 24px;
+      padding: 22px;
+      box-shadow: var(--shadow);
+      margin-bottom: 22px;
+    }
+
+    .hero-grid,
+    .stats-grid,
+    .flow-grid {
+      display: grid;
+      gap: 14px;
+    }
+
+    .hero-grid {
+      grid-template-columns: 1.5fr 1fr;
+      align-items: start;
+    }
+
+    .stats-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .stat {
+      border: 1px solid rgba(220, 207, 184, 0.9);
+      background: rgba(255, 255, 255, 0.7);
+      border-radius: 16px;
+      padding: 14px;
+    }
+
+    .stat b {
+      display: block;
+      font-size: 28px;
+      margin-top: 8px;
+      font-family: Georgia, "Times New Roman", serif;
+    }
+
+    .panels {
+      display: grid;
+      gap: 20px;
+    }
+
+    .panel {
+      border: 1px solid var(--line);
+      background: rgba(255, 253, 248, 0.9);
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      padding: 18px 20px;
+      background: rgba(248, 244, 235, 0.92);
+      border-bottom: 1px solid rgba(220, 207, 184, 0.8);
+    }
+
+    .panel-body {
+      padding: 18px 20px 20px;
+    }
+
+    .flow-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .flow-card {
+      border: 1px solid var(--line);
+      background: white;
+      border-radius: 16px;
+      padding: 16px;
+    }
+
+    .month-strip {
+      display: flex;
+      gap: 10px;
+      overflow: auto;
+      padding-bottom: 4px;
+    }
+
+    .month-pill {
+      min-width: 220px;
+      border-radius: 18px;
+      padding: 14px 16px;
+      background: linear-gradient(135deg, #174e5f, #0f5c5a);
+      color: white;
+      box-shadow: var(--shadow);
+    }
+
+    .month-pill small {
+      display: block;
+      color: rgba(255, 255, 255, 0.72);
+      margin-bottom: 6px;
+    }
+
+    .lessons {
+      display: grid;
+      gap: 16px;
+    }
+
+    details.lesson {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: white;
+      overflow: hidden;
+    }
+
+    details.lesson[open] {
+      box-shadow: var(--shadow);
+    }
+
+    details.lesson summary {
+      list-style: none;
+      cursor: pointer;
+      padding: 18px 18px 16px;
+      background:
+        linear-gradient(90deg, rgba(240, 195, 122, 0.26), rgba(255, 255, 255, 0)),
+        white;
+    }
+
+    details.lesson summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .lesson-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: flex-start;
+    }
+
+    .lesson-title {
+      display: grid;
+      gap: 6px;
+    }
+
+    .lesson-title strong {
+      font-size: 20px;
+      font-family: Georgia, "Times New Roman", serif;
+    }
+
+    .lesson-summary {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .lesson-body {
+      padding: 0 18px 18px;
+      display: grid;
+      gap: 16px;
+    }
+
+    .summary-row {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .summary-box {
+      border-radius: 14px;
+      padding: 12px;
+      background: var(--panel-2);
+      border: 1px solid rgba(220, 207, 184, 0.86);
+    }
+
+    .summary-box b {
+      display: block;
+      font-size: 22px;
+      margin-top: 4px;
+    }
+
+    .table-wrap {
+      border: 1px solid rgba(220, 207, 184, 0.95);
+      border-radius: 16px;
+      overflow: auto;
+      max-height: 380px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 980px;
+      font-size: 14px;
+    }
+
+    thead th {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      background: #214f65;
+      color: white;
+      text-align: left;
+      padding: 12px 10px;
+      font-size: 13px;
+      letter-spacing: 0.02em;
+    }
+
+    tbody td {
+      padding: 10px;
+      border-top: 1px solid #eee7d8;
+      white-space: nowrap;
+    }
+
+    tbody tr:nth-child(even) {
+      background: #fcfaf5;
+    }
+
+    tbody tr.mod-row {
+      background: #eef8f5;
+      font-weight: 700;
+    }
+
+    .sticky-note {
+      border-left: 4px solid var(--accent-2);
+      padding: 12px 14px;
+      background: #fff7ef;
+      border-radius: 12px;
+      color: #704628;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    @media (max-width: 1100px) {
+      .app {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        position: static;
+        height: auto;
+        border-right: 0;
+        border-bottom: 1px solid rgba(220, 207, 184, 0.8);
+      }
+
+      .hero-grid,
+      .stats-grid,
+      .flow-grid,
+      .summary-row {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <small>Interactive concept</small>
+        <h1>Attendance layout</h1>
+        <div class="meta">Прототип для проверки удобства до внедрения в Google Sheets.</div>
+      </div>
+
+      <div class="sidebar-section">
+        <h3>Режимы просмотра</h3>
+        <div class="sheet-list">
+          <div class="sheet-card active" data-screen="index">
+            <strong>1. Index продукта</strong>
+            <div class="muted">Сводка по потокам и месяцам.</div>
+          </div>
+          <div class="sheet-card" data-screen="flow-month">
+            <strong>2. Поток + месяц</strong>
+            <div class="muted">Главный кандидат для реальной работы.</div>
+          </div>
+          <div class="sheet-card" data-screen="lesson-focus">
+            <strong>3. Один урок крупно</strong>
+            <div class="muted">Для проверки читаемости 150 учеников.</div>
+          </div>
+          <div class="sheet-card" data-screen="payroll">
+            <strong>4. Зарплатная сводка</strong>
+            <div class="muted">Кто сколько уроков вёл и где были замены.</div>
+          </div>
+          <div class="sheet-card" data-screen="sync">
+            <strong>5. История и daily sync</strong>
+            <div class="muted">Как забрать март-апрель и дальше обновлять ежедневно.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <h3>Что здесь проверяем</h3>
+        <div class="tag-row">
+          <span class="tag">30+ потоков</span>
+          <span class="tag">150 учеников</span>
+          <span class="tag warn">4-5 уроков в неделю</span>
+          <span class="tag good">месяц отдельно</span>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <h3>На что смотреть глазами</h3>
+        <div class="muted">
+          Удобно ли быстро найти поток, месяц и урок. Достаточно ли видно картину без чтения всех 150 строк.
+        </div>
+      </div>
+    </aside>
+
+    <main class="content">
+      <div id="screen-index">
+        <div class="topbar">
+          <div>
+            <h2>IELTS Product Overview</h2>
+            <div class="meta">Это выглядело бы как стартовый лист `INDEX` внутри продукта.</div>
+          </div>
+          <div class="controls">
+            <button class="control active">IELTS</button>
+            <button class="control">RTN</button>
+            <button class="control">RTI</button>
+            <button class="control">VIP</button>
+            <button class="control">NUET</button>
+          </div>
+        </div>
+
+        <section class="hero">
+          <div class="hero-grid">
+            <div>
+              <h3>Зачем нужен индекс</h3>
+              <p class="muted">
+                Вместо того чтобы скроллить гигантский лист, ты сначала попадаешь в обзор продукта, где видно все потоки,
+                нагрузку по месяцам и проблемные места. Дальше уже проваливаешься в нужный `поток + месяц`.
+              </p>
+              <div class="sticky-note">
+                Главная идея: не читать сырой список, пока не нужно. Сначала видеть навигацию и агрегированную картину.
+              </div>
+            </div>
+            <div class="stats-grid">
+              <div class="stat">
+                Потоков
+                <b>34</b>
+              </div>
+              <div class="stat">
+                Уроков в апреле
+                <b>286</b>
+              </div>
+              <div class="stat">
+                Пиковая группа
+                <b>152</b>
+              </div>
+              <div class="stat">
+                Рисковые уроки
+                <b>19</b>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <h3>Быстрые месяцы</h3>
+              <div class="meta">Можно сразу понять, где плотность самая высокая.</div>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="month-strip">
+              <div class="month-pill">
+                <small>Месяц</small>
+                <strong>Апрель 2026</strong>
+                286 уроков • 34 активных потока
+              </div>
+              <div class="month-pill" style="background:linear-gradient(135deg,#8b553f,#d17b49)">
+                <small>Месяц</small>
+                <strong>Май 2026</strong>
+                301 урок • 35 активных потоков
+              </div>
+              <div class="month-pill" style="background:linear-gradient(135deg,#7b6246,#c39b62)">
+                <small>Месяц</small>
+                <strong>Июнь 2026</strong>
+                274 урока • 31 активный поток
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <h3>Потоки</h3>
+              <div class="meta">Именно отсюда открывается лист `поток + месяц`.</div>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="flow-grid">
+              <div class="flow-card">
+                <strong>IELTS 49</strong>
+                <div class="muted">Апрель 2026 • 16 уроков • 148-152 учеников</div>
+                <div class="tag-row">
+                  <span class="tag good">Стабильный поток</span>
+                  <span class="tag">Открыть апрель</span>
+                </div>
+              </div>
+              <div class="flow-card">
+                <strong>IELTS 44</strong>
+                <div class="muted">Апрель 2026 • 14 уроков • 132-141 ученик</div>
+                <div class="tag-row">
+                  <span class="tag warn">Много опозданий</span>
+                  <span class="tag">Открыть апрель</span>
+                </div>
+              </div>
+              <div class="flow-card">
+                <strong>IELTS 52</strong>
+                <div class="muted">Апрель 2026 • 15 уроков • 149-150 учеников</div>
+                <div class="tag-row">
+                  <span class="tag alert">Плотная группа</span>
+                  <span class="tag">Открыть апрель</span>
+                </div>
+              </div>
+              <div class="flow-card">
+                <strong>IELTS VIP 3</strong>
+                <div class="muted">Апрель 2026 • 8 уроков • 11-14 учеников</div>
+                <div class="tag-row">
+                  <span class="tag good">Компактный поток</span>
+                  <span class="tag">Открыть апрель</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <div id="screen-flow-month" class="hidden">
+        <div class="topbar">
+          <div>
+            <h2>IELTS 49 • Апрель 2026</h2>
+            <div class="meta">Это модель рабочего листа, где лежит только один поток и только один месяц.</div>
+          </div>
+          <div class="controls">
+            <button class="control active">Уроки</button>
+            <button class="control">Итоги месяца</button>
+            <button class="control">Проблемные ученики</button>
+          </div>
+        </div>
+
+        <section class="hero">
+          <div class="hero-grid">
+            <div>
+              <h3>Что важно в этом формате</h3>
+              <p class="muted">
+                Ты не смотришь весь продукт сразу и не держишь у себя в голове 52 урока за год.
+                Ты открываешь только `IELTS 49` и только `Апрель 2026`, а внутри уже читаешь уроки блоками.
+              </p>
+            </div>
+            <div class="stats-grid">
+              <div class="stat">
+                Уроков
+                <b>16</b>
+              </div>
+              <div class="stat">
+                Макс. учеников
+                <b>152</b>
+              </div>
+              <div class="stat">
+                Ср. посещ.
+                <b>146</b>
+              </div>
+              <div class="stat">
+                Проблемных
+                <b>12</b>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <h3>Лента уроков месяца</h3>
+              <div class="meta">Каждый урок сначала показывает краткий summary. Полный список раскрывается только когда нужно.</div>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="lessons">
+              <details class="lesson" open>
+                <summary>
+                  <div class="lesson-head">
+                    <div class="lesson-title">
+                      <strong>Lesson 10 • 02.04.2026 • 15:00</strong>
+                      <span class="muted">IELTS 49 • Teacher: Alexandra Bel • Room BBB-A12</span>
+                    </div>
+                    <div class="lesson-summary">
+                      <span class="tag">152 всего</span>
+                      <span class="tag good">141 полный урок</span>
+                      <span class="tag warn">8 опоздали</span>
+                      <span class="tag alert">3 рано ушли</span>
+                    </div>
+                  </div>
+                </summary>
+                <div class="lesson-body">
+                  <div class="summary-row">
+                    <div class="summary-box">Присутствовали<b>152</b></div>
+                    <div class="summary-box">Почти полный урок<b>141</b></div>
+                    <div class="summary-box">Опоздали<b>8</b></div>
+                    <div class="summary-box">Рано ушли<b>3</b></div>
+                    <div class="summary-box">Модераторы<b>2</b></div>
+                  </div>
+
+                  <div class="table-wrap">
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>Name</th>
+                          <th>Role</th>
+                          <th>Duration</th>
+                          <th>Activity</th>
+                          <th>Talk</th>
+                          <th>Webcam</th>
+                          <th>Messages</th>
+                          <th>Join</th>
+                          <th>Left</th>
+                          <th>Status</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr class="mod-row">
+                          <td>Alexandra Bel</td>
+                          <td>Moderator</td>
+                          <td>01:30:59</td>
+                          <td>0.0</td>
+                          <td>00:50:31</td>
+                          <td>01:28:04</td>
+                          <td>14</td>
+                          <td>15:01</td>
+                          <td>16:32</td>
+                          <td>Teacher</td>
+                        </tr>
+                        <tr>
+                          <td>Rayana Ikhsan</td>
+                          <td>Student</td>
+                          <td>01:29:30</td>
+                          <td>1.6</td>
+                          <td>00:00:49</td>
+                          <td>01:18:13</td>
+                          <td>11</td>
+                          <td>15:02</td>
+                          <td>16:31</td>
+                          <td>Full lesson</td>
+                        </tr>
+                        <tr>
+                          <td>Togzhan Sansei</td>
+                          <td>Student</td>
+                          <td>01:29:16</td>
+                          <td>1.0</td>
+                          <td>00:00:35</td>
+                          <td>-</td>
+                          <td>10</td>
+                          <td>15:02</td>
+                          <td>16:31</td>
+                          <td>Full lesson</td>
+                        </tr>
+                        <tr>
+                          <td>Amirzhan Dilshat</td>
+                          <td>Student</td>
+                          <td>01:29:20</td>
+                          <td>2.7</td>
+                          <td>00:01:29</td>
+                          <td>-</td>
+                          <td>10</td>
+                          <td>15:03</td>
+                          <td>16:31</td>
+                          <td>Full lesson</td>
+                        </tr>
+                        <tr>
+                          <td>Zholai Alisher</td>
+                          <td>Student</td>
+                          <td>01:18:56</td>
+                          <td>0.9</td>
+                          <td>00:00:28</td>
+                          <td>-</td>
+                          <td>10</td>
+                          <td>15:12</td>
+                          <td>16:31</td>
+                          <td>Late</td>
+                        </tr>
+                        <tr>
+                          <td>Baltashev Alda</td>
+                          <td>Student</td>
+                          <td>00:28:46</td>
+                          <td>5.6</td>
+                          <td>00:01:38</td>
+                          <td>-</td>
+                          <td>15</td>
+                          <td>15:03</td>
+                          <td>15:32</td>
+                          <td>Left early</td>
+                        </tr>
+                        <tr>
+                          <td>... ещё 146 строк ...</td>
+                          <td>Student</td>
+                          <td>...</td>
+                          <td>...</td>
+                          <td>...</td>
+                          <td>...</td>
+                          <td>...</td>
+                          <td>...</td>
+                          <td>...</td>
+                          <td>...</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </details>
+
+              <details class="lesson">
+                <summary>
+                  <div class="lesson-head">
+                    <div class="lesson-title">
+                      <strong>Lesson 11 • 04.04.2026 • 15:00</strong>
+                      <span class="muted">IELTS 49 • Teacher: Alexandra Bel • Room BBB-A12</span>
+                    </div>
+                    <div class="lesson-summary">
+                      <span class="tag">149 всего</span>
+                      <span class="tag good">137 полный урок</span>
+                      <span class="tag warn">9 опоздали</span>
+                      <span class="tag alert">3 рано ушли</span>
+                    </div>
+                  </div>
+                </summary>
+                <div class="lesson-body">
+                  <div class="sticky-note">Тот же принцип: пока урок закрыт, ты видишь только суть. Полный список открывается по необходимости.</div>
+                </div>
+              </details>
+
+              <details class="lesson">
+                <summary>
+                  <div class="lesson-head">
+                    <div class="lesson-title">
+                      <strong>Lesson 12 • 07.04.2026 • 15:00</strong>
+                      <span class="muted">IELTS 49 • Teacher: Alexandra Bel • Room BBB-A12</span>
+                    </div>
+                    <div class="lesson-summary">
+                      <span class="tag">150 всего</span>
+                      <span class="tag good">142 полный урок</span>
+                      <span class="tag warn">5 опоздали</span>
+                      <span class="tag alert">3 рано ушли</span>
+                    </div>
+                  </div>
+                </summary>
+                <div class="lesson-body">
+                  <div class="sticky-note">В живой таблице это может быть отдельный блок строк, а не HTML-accordion. Здесь мы просто тестируем удобство идеи.</div>
+                </div>
+              </details>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <div id="screen-lesson-focus" class="hidden">
+        <div class="topbar">
+          <div>
+            <h2>Один урок крупно</h2>
+            <div class="meta">Этот экран нужен, чтобы проверить: если у урока 150 учеников, не больно ли его читать.</div>
+          </div>
+        </div>
+
+        <section class="hero">
+          <div class="hero-grid">
+            <div>
+              <h3>Как это может решать проблему гигантского скролла</h3>
+              <p class="muted">
+                Даже если сам урок длинный, ты сначала видишь агрегаты и только потом таблицу. Это значит, что тебе не нужно
+                глазами пробегать 150 строк ради ответа на вопрос “что вообще произошло на этом уроке?”.
+              </p>
+            </div>
+            <div class="stats-grid">
+              <div class="stat">Всего<b>150</b></div>
+              <div class="stat">Late<b>11</b></div>
+              <div class="stat">Early left<b>4</b></div>
+              <div class="stat">Quiet<b>19</b></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <h3>Читаемый порядок внутри урока</h3>
+              <div class="meta">Teacher сверху, затем ученики с понятным статусом, проблемные подсвечены.</div>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="summary-row">
+              <div class="summary-box">Teacher online<b>2</b></div>
+              <div class="summary-box">Full lesson<b>135</b></div>
+              <div class="summary-box">Late arrivals<b>11</b></div>
+              <div class="summary-box">Left early<b>4</b></div>
+              <div class="summary-box">Low activity<b>19</b></div>
+            </div>
+
+            <div class="table-wrap" style="margin-top:16px; max-height: 560px;">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Role</th>
+                    <th>Duration</th>
+                    <th>Join</th>
+                    <th>Left</th>
+                    <th>Activity</th>
+                    <th>Talk</th>
+                    <th>Messages</th>
+                    <th>Visual marker</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="mod-row">
+                    <td>Alexandra Bel</td>
+                    <td>Moderator</td>
+                    <td>01:30:59</td>
+                    <td>15:01</td>
+                    <td>16:32</td>
+                    <td>0.0</td>
+                    <td>00:50:31</td>
+                    <td>14</td>
+                    <td>Teacher</td>
+                  </tr>
+                  <tr>
+                    <td>Student A</td>
+                    <td>Student</td>
+                    <td>01:29:10</td>
+                    <td>15:02</td>
+                    <td>16:31</td>
+                    <td>2.8</td>
+                    <td>00:02:14</td>
+                    <td>17</td>
+                    <td class="tag good">Full lesson</td>
+                  </tr>
+                  <tr>
+                    <td>Student B</td>
+                    <td>Student</td>
+                    <td>01:10:20</td>
+                    <td>15:19</td>
+                    <td>16:31</td>
+                    <td>0.7</td>
+                    <td>00:00:11</td>
+                    <td>4</td>
+                    <td class="tag warn">Late</td>
+                  </tr>
+                  <tr>
+                    <td>Student C</td>
+                    <td>Student</td>
+                    <td>00:33:45</td>
+                    <td>15:02</td>
+                    <td>15:36</td>
+                    <td>0.2</td>
+                    <td>00:00:00</td>
+                    <td>1</td>
+                    <td class="tag alert">Left early</td>
+                  </tr>
+                  <tr>
+                    <td>Student D</td>
+                    <td>Student</td>
+                    <td>01:28:59</td>
+                    <td>15:03</td>
+                    <td>16:31</td>
+                    <td>0.1</td>
+                    <td>00:00:00</td>
+                    <td>0</td>
+                    <td class="tag">Quiet</td>
+                  </tr>
+                  <tr>
+                    <td>... ещё 145 строк ...</td>
+                    <td>Student</td>
+                    <td>...</td>
+                    <td>...</td>
+                    <td>...</td>
+                    <td>...</td>
+                    <td>...</td>
+                    <td>...</td>
+                    <td>...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <div id="screen-payroll" class="hidden">
+        <div class="topbar">
+          <div>
+            <h2>Payroll Summary • Апрель 2026</h2>
+            <div class="meta">Экран для конца месяца: кто сколько уроков провёл в какой группе и где были замены.</div>
+          </div>
+          <div class="controls">
+            <button class="control active">Summary</button>
+            <button class="control">Replacements</button>
+            <button class="control">Teacher view</button>
+          </div>
+        </div>
+
+        <section class="hero">
+          <div class="hero-grid">
+            <div>
+              <h3>Как это считать</h3>
+              <p class="muted">
+                По каждому уроку мы фиксируем группу, продукт, дату и преподавателя-модератора. В конце месяца строим две сводки:
+                по группам и по преподавателям. Основной преподаватель определяется по большинству уроков в группе за месяц,
+                остальные записи автоматически попадают в замены.
+              </p>
+              <div class="sticky-note">
+                Ключевая польза: в конце месяца тебе не нужно вручную листать уроки и вспоминать, кто кого заменял.
+              </div>
+            </div>
+            <div class="stats-grid">
+              <div class="stat">
+                Преподавателей
+                <b>18</b>
+              </div>
+              <div class="stat">
+                Групп
+                <b>34</b>
+              </div>
+              <div class="stat">
+                Всего замен
+                <b>11</b>
+              </div>
+              <div class="stat">
+                Уроков за месяц
+                <b>286</b>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <h3>Сводка по группам</h3>
+              <div class="meta">Эта таблица отвечает на вопрос: кто вёл конкретную группу и кто её подменял.</div>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="table-wrap" style="max-height: 420px;">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Group</th>
+                    <th>Product</th>
+                    <th>Main teacher</th>
+                    <th>Main lessons</th>
+                    <th>Replacement teacher</th>
+                    <th>Replacement lessons</th>
+                    <th>Replacement dates</th>
+                    <th>Total lessons</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>IELTS 47</td>
+                    <td>IELTS</td>
+                    <td>Гульмира</td>
+                    <td>12</td>
+                    <td>Тимур</td>
+                    <td>1</td>
+                    <td>18.04.2026</td>
+                    <td>13</td>
+                  </tr>
+                  <tr>
+                    <td>IELTS 49</td>
+                    <td>IELTS</td>
+                    <td>Айгерим</td>
+                    <td>14</td>
+                    <td>-</td>
+                    <td>0</td>
+                    <td>-</td>
+                    <td>14</td>
+                  </tr>
+                  <tr>
+                    <td>RTN 10.0</td>
+                    <td>RTN</td>
+                    <td>Тимур</td>
+                    <td>11</td>
+                    <td>Гульмира</td>
+                    <td>2</td>
+                    <td>09.04.2026, 23.04.2026</td>
+                    <td>13</td>
+                  </tr>
+                  <tr>
+                    <td>NUET VIP 3</td>
+                    <td>NUET</td>
+                    <td>Алия</td>
+                    <td>8</td>
+                    <td>Мадина</td>
+                    <td>1</td>
+                    <td>25.04.2026</td>
+                    <td>9</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <h3>Сводка по преподавателям</h3>
+              <div class="meta">Эта таблица уже ближе к зарплате: сколько всего уроков провёл каждый преподаватель и по каким группам.</div>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="table-wrap" style="max-height: 420px;">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Teacher</th>
+                    <th>Total lessons</th>
+                    <th>Main lessons</th>
+                    <th>Replacement lessons</th>
+                    <th>Groups</th>
+                    <th>Replacement dates</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Гульмира</td>
+                    <td>27</td>
+                    <td>25</td>
+                    <td>2</td>
+                    <td>IELTS 47, IELTS 50, RTN 10.0</td>
+                    <td>09.04.2026, 23.04.2026</td>
+                  </tr>
+                  <tr>
+                    <td>Тимур</td>
+                    <td>19</td>
+                    <td>18</td>
+                    <td>1</td>
+                    <td>RTN 10.0, RTN 17.3, IELTS 47</td>
+                    <td>18.04.2026</td>
+                  </tr>
+                  <tr>
+                    <td>Айгерим</td>
+                    <td>14</td>
+                    <td>14</td>
+                    <td>0</td>
+                    <td>IELTS 49</td>
+                    <td>-</td>
+                  </tr>
+                  <tr>
+                    <td>Алия</td>
+                    <td>8</td>
+                    <td>8</td>
+                    <td>0</td>
+                    <td>NUET VIP 3</td>
+                    <td>-</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <div id="screen-sync" class="hidden">
+        <div class="topbar">
+          <div>
+            <h2>Историческая загрузка и ежедневная выгрузка</h2>
+            <div class="meta">Здесь видно, как может работать backfill за март-апрель и обычный daily режим.</div>
+          </div>
+          <div class="controls">
+            <button class="control active">Backfill</button>
+            <button class="control">Daily</button>
+          </div>
+        </div>
+
+        <section class="hero">
+          <div class="hero-grid">
+            <div>
+              <h3>Два режима работы</h3>
+              <p class="muted">
+                Сначала один раз запускаем историческую загрузку, чтобы забрать старые `Report.csv` за март и апрель 2026.
+                После этого оставляем ежедневный запуск утром по Алматы, чтобы на следующий день уже видеть все вечерние уроки за вчера.
+              </p>
+            </div>
+            <div class="stats-grid">
+              <div class="stat">
+                Период backfill
+                <b>61 день</b>
+              </div>
+              <div class="stat">
+                Daily запуск
+                <b>09:00</b>
+              </div>
+              <div class="stat">
+                Логика
+                <b>No duplicates</b>
+              </div>
+              <div class="stat">
+                Источник
+                <b>BBB reports</b>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <h3>Историческая загрузка</h3>
+              <div class="meta">Разовый импорт, чтобы подтянуть прошлые уроки, если BBB ещё хранит их в Meeting History.</div>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="flow-grid">
+              <div class="flow-card">
+                <strong>Шаг 1. Забираем всё из Meeting History</strong>
+                <div class="muted">Бот проходит по всем `Report.csv`, не только по вчерашним урокам.</div>
+              </div>
+              <div class="flow-card">
+                <strong>Шаг 2. Фильтр по дате</strong>
+                <div class="muted">Оставляем только период с 01.03.2026 по 30.04.2026.</div>
+              </div>
+              <div class="flow-card">
+                <strong>Шаг 3. Дедупликация</strong>
+                <div class="muted">Если урок уже загружен раньше, повторно не пишем его в таблицы.</div>
+              </div>
+              <div class="flow-card">
+                <strong>Шаг 4. Строим summary</strong>
+                <div class="muted">После импорта сразу пересчитываем месячные сводки по урокам и зарплате.</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <h3>Ежедневный режим</h3>
+              <div class="meta">После backfill бот каждый день забирает только новые уроки, например утром в 09:00 по Алматы.</div>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="table-wrap" style="max-height: 320px;">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Run time</th>
+                    <th>Берём какие уроки</th>
+                    <th>Что обновляем</th>
+                    <th>Результат</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>04.04.2026 09:00</td>
+                    <td>Все новые уроки за 03.04.2026</td>
+                    <td>Lesson sheets + Payroll April 2026</td>
+                    <td>К утру видны вчерашние репорты</td>
+                  </tr>
+                  <tr>
+                    <td>05.04.2026 09:00</td>
+                    <td>Все новые уроки за 04.04.2026</td>
+                    <td>Lesson sheets + Payroll April 2026</td>
+                    <td>Без дублей, только новые записи</td>
+                  </tr>
+                  <tr>
+                    <td>06.04.2026 09:00</td>
+                    <td>Все новые уроки за 05.04.2026</td>
+                    <td>Lesson sheets + Payroll April 2026</td>
+                    <td>Автоматически считается monthly summary</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const cards = document.querySelectorAll(".sheet-card");
+    const screens = {
+      index: document.getElementById("screen-index"),
+      "flow-month": document.getElementById("screen-flow-month"),
+      "lesson-focus": document.getElementById("screen-lesson-focus"),
+      payroll: document.getElementById("screen-payroll"),
+      sync: document.getElementById("screen-sync")
+    };
+
+    cards.forEach((card) => {
+      card.addEventListener("click", () => {
+        cards.forEach((item) => item.classList.remove("active"));
+        Object.values(screens).forEach((screen) => screen.classList.add("hidden"));
+        card.classList.add("active");
+        screens[card.dataset.screen].classList.remove("hidden");
+      });
+    });
+  </script>
+</body>
+</html>
