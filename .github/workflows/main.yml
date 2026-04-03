@@ -35,6 +35,10 @@ jobs:
           name: debug
           path: |
             debug_login_page.png
-            debug_login_page.html
+            debug_before_submit.png
+            debug_after_login.png
+            debug_after_login.html
             debug_meetings.png
+            debug_meetings.html
             debug_screenshot.png
+          overwrite: true
