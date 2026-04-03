@@ -98,16 +98,20 @@ LESSON_ARCHIVE_COLUMNS = [
 
 
 def gspread_with_retry(func, *args, retries=5, **kwargs):
+    retriable_codes = ("429", "500", "502", "503", "504")
+
     for attempt in range(retries):
         try:
             return func(*args, **kwargs)
         except gspread.exceptions.APIError as exc:
-            if "429" in str(exc) and attempt < retries - 1:
-                wait = 60 + attempt * 20
-                print(f"  Rate limit — жду {wait} сек...")
+            message = str(exc)
+            if any(code in message for code in retriable_codes) and attempt < retries - 1:
+                wait = 20 + attempt * 15
+                print(f"  Google API временно недоступен — жду {wait} сек...")
                 time.sleep(wait)
             else:
                 raise
+
 
 
 def safe_batch_update(spreadsheet, body: dict):
@@ -461,7 +465,7 @@ def open_product_spreadsheets(gc):
 
         print(f"Пробую открыть {product}: {spreadsheet_id}")
         try:
-            spreadsheets[product] = gc.open_by_key(spreadsheet_id)
+            spreadsheets[product] = gspread_with_retry(gc.open_by_key, spreadsheet_id, retries=5)
             print(f"ОК: {product}")
         except Exception as exc:
             print(f"Ошибка для {product} ({spreadsheet_id}): {exc}")
@@ -471,6 +475,7 @@ def open_product_spreadsheets(gc):
         raise ValueError(f"Не заданы переменные окружения: {', '.join(missing)}")
 
     return spreadsheets
+
 
 
 
