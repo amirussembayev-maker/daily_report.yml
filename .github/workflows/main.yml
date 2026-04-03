@@ -27,7 +27,7 @@ jobs:
           GOOGLE_JSON: ${{ secrets.GOOGLE_JSON }}
           BBB_PASSWORD: ${{ secrets.BBB_PASSWORD }}
 
-      # Сохраняет скриншот если бот упал — для отладки селекторов
+    
       - name: Upload debug artifacts
         if: always()
         uses: actions/upload-artifact@v4
@@ -35,10 +35,9 @@ jobs:
           name: debug
           path: |
             debug_login_page.png
+            debug_signin_tab.png
             debug_before_submit.png
             debug_after_login.png
-            debug_after_login.html
             debug_meetings.png
             debug_meetings.html
-            debug_screenshot.png
           overwrite: true
