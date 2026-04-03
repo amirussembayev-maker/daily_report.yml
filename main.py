@@ -8,7 +8,7 @@ from playwright.sync_api import sync_playwright
 
 
 # ──────────────────────────────────────────────
-# 1. СКАЧИВАНИЕ CSV ЧЕРЕЗ PLAYWRIGHT
+# 1. СКАЧИВАНИЕ ВСЕХ CSV ЧЕРЕЗ PLAYWRIGHT
 # ──────────────────────────────────────────────
 
 def run_bot() -> list:
@@ -41,13 +41,11 @@ def run_bot() -> list:
                   wait_until="domcontentloaded", timeout=30000)
         page.wait_for_timeout(3000)
 
-        # Кликаем вкладку Sign In
         btn = page.query_selector("button:has-text('Sign In')")
         if btn:
             btn.click()
             page.wait_for_timeout(1500)
 
-        # Находим видимые поля
         inputs = page.query_selector_all("input")
         visible_text, visible_pass = None, None
         for inp in inputs:
@@ -62,7 +60,6 @@ def run_bot() -> list:
             browser.close()
             raise RuntimeError("Поля логина не найдены.")
 
-        # Вводим данные
         visible_text.click()
         page.wait_for_timeout(300)
         page.keyboard.type("260401190051930", delay=50)
@@ -72,13 +69,11 @@ def run_bot() -> list:
         page.keyboard.type(password, delay=50)
         page.wait_for_timeout(500)
 
-        # Нажимаем SIGN IN и ждём навигации
         print("BOT: Нажимаю SIGN IN...")
         try:
             with page.expect_navigation(timeout=15000):
                 page.click('button:has-text("SIGN IN")')
         except Exception:
-            # Если навигации не было — ждём ещё немного
             page.wait_for_timeout(5000)
 
         print(f"BOT: URL после входа: {page.url}")
@@ -97,46 +92,49 @@ def run_bot() -> list:
         print(f"BOT: Meetings URL: {page.url}")
         page.screenshot(path="debug_meetings.png", full_page=True)
 
-        # ── Скачиваем репорты за сегодня ──────────────────────────────────
-        today = datetime.now().strftime("%-m/%-d/%Y")
-        print(f"BOT: Ищу встречи за сегодня ({today})...")
+        # ── Скачиваем ВСЕ репорты (без фильтра по дате) ──────────────────
+        print("BOT: Скачиваю ВСЕ репорты...")
 
         rows = page.query_selector_all("tr")
         print(f"BOT: Строк в таблице: {len(rows)}")
 
         saved_files = []
-        for row in rows:
-            if today not in row.inner_text():
-                continue
-
+        for i, row in enumerate(rows):
             report_link = row.query_selector("a:has-text('Report.CSV'), a:has-text('Report.csv')")
             if not report_link:
                 continue
 
+            # Название встречи
             name_el = row.query_selector("td:first-child a, td:first-child")
-            meeting_name = name_el.inner_text().strip() if name_el else "Unknown"
-            print(f"BOT: Скачиваю '{meeting_name}'...")
+            meeting_name = name_el.inner_text().strip() if name_el else f"Meeting_{i}"
 
-            with page.expect_download(timeout=30000) as dl_info:
-                report_link.click()
+            # Дата встречи из строки (для записи в таблицу)
+            cells = row.query_selector_all("td")
+            meeting_date = cells[1].inner_text().strip() if len(cells) > 1 else ""
 
-            download = dl_info.value
-            filename = re.sub(r'[\\/*?:"<>|]', "_", meeting_name) + ".csv"
-            save_path = os.path.join(download_dir, filename)
-            download.save_as(save_path)
-            print(f"BOT: Сохранён → {save_path}")
-            saved_files.append((meeting_name, save_path))
-            page.wait_for_timeout(1000)
+            print(f"BOT: Скачиваю '{meeting_name}' ({meeting_date})...")
+
+            try:
+                with page.expect_download(timeout=30000) as dl_info:
+                    report_link.click()
+
+                download = dl_info.value
+                filename = re.sub(r'[\\/*?:"<>|]', "_", f"{meeting_name}_{meeting_date}") + ".csv"
+                save_path = os.path.join(download_dir, filename)
+                download.save_as(save_path)
+                print(f"BOT: Сохранён → {save_path}")
+                saved_files.append((meeting_name, meeting_date, save_path))
+                page.wait_for_timeout(800)
+            except Exception as e:
+                print(f"BOT: Ошибка при скачивании '{meeting_name}': {e}")
+                continue
 
         browser.close()
 
         if not saved_files:
-            raise RuntimeError(
-                f"Не найдено встреч за сегодня ({today}). "
-                "Смотри debug_meetings.png"
-            )
+            raise RuntimeError("Ни одного репорта не скачано. Смотри debug_meetings.png")
 
-        print(f"BOT: Скачано файлов: {len(saved_files)}")
+        print(f"BOT: Всего скачано: {len(saved_files)} файлов")
         return saved_files
 
 
@@ -149,27 +147,27 @@ COLUMNS = ["Date", "Name", "Role", "Duration", "Activity Score",
            "Poll Votes", "Raise Hands", "Join", "Left"]
 
 
-def update_sheets(meeting_name: str, file_path: str, gc, sh):
+def update_sheets(meeting_name: str, meeting_date: str, file_path: str, gc, sh):
     sheet_name = meeting_name.strip()
 
     try:
         df = pd.read_csv(file_path)
-        print(f"  Прочитано строк: {len(df)}")
     except Exception as e:
         print(f"  ОШИБКА чтения: {e}")
         return
 
     # Убираем Anonymous
     df = df[df["Name"].notna() & (df["Name"].astype(str) != "Anonymous")]
+    if df.empty:
+        print(f"  Пропускаю '{sheet_name}' — нет данных.")
+        return
 
     # Добавляем служебные колонки
-    today_str = datetime.now().strftime("%d.%m.%Y")
-    df["Date"] = today_str
+    df["Date"] = meeting_date
     df["Role"] = df["Moderator"].apply(
         lambda x: "Moderator" if str(x).upper() == "TRUE" else "Student"
     )
 
-    # Берём только нужные колонки
     available = [c for c in COLUMNS if c in df.columns]
     df = df[available]
 
@@ -184,8 +182,8 @@ def update_sheets(meeting_name: str, file_path: str, gc, sh):
     if is_new:
         worksheet.update("A1", [available])
 
-    # Разделитель дня
-    separator = [[f"── {today_str} · {meeting_name} ──"] + [""] * (len(available) - 1)]
+    # Разделитель
+    separator = [[f"── {meeting_date} ──"] + [""] * (len(available) - 1)]
     worksheet.append_rows(separator, value_input_option="RAW")
 
     # Данные
@@ -223,8 +221,8 @@ if __name__ == "__main__":
         print(f"ОШИБКА бота: {e}")
         exit(1)
 
-    for meeting_name, file_path in files:
-        print(f"\nОбрабатываю: {meeting_name}")
-        update_sheets(meeting_name, file_path, gc, sh)
+    for meeting_name, meeting_date, file_path in files:
+        print(f"\nОбрабатываю: {meeting_name} ({meeting_date})")
+        update_sheets(meeting_name, meeting_date, file_path, gc, sh)
 
     print("\n=== ГОТОВО ===")
