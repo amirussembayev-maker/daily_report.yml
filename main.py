@@ -1,6 +1,7 @@
 import os
 import re
 import json
+import time
 import pandas as pd
 import gspread
 from datetime import datetime
@@ -8,7 +9,7 @@ from playwright.sync_api import sync_playwright
 
 
 # ──────────────────────────────────────────────
-# 1. СКАЧИВАНИЕ ВСЕХ CSV ЧЕРЕЗ PLAYWRIGHT
+# 1. СКАЧИВАНИЕ CSV ЧЕРЕЗ PLAYWRIGHT
 # ──────────────────────────────────────────────
 
 def run_bot() -> list:
@@ -63,7 +64,6 @@ def run_bot() -> list:
         visible_text.click()
         page.wait_for_timeout(300)
         page.keyboard.type("260401190051930", delay=50)
-
         visible_pass.click()
         page.wait_for_timeout(300)
         page.keyboard.type(password, delay=50)
@@ -85,18 +85,23 @@ def run_bot() -> list:
 
         print("BOT: Авторизован!")
 
-        # ── Переход на Meeting History ────────────────────────────────────
+        # ── Meeting History ───────────────────────────────────────────────
         page.goto("https://biggerbluebutton.com/rooms/meetings",
                   wait_until="networkidle", timeout=30000)
         page.wait_for_timeout(3000)
         print(f"BOT: Meetings URL: {page.url}")
         page.screenshot(path="debug_meetings.png", full_page=True)
 
-        # ── Скачиваем ВСЕ репорты (без фильтра по дате) ──────────────────
-        print("BOT: Скачиваю ВСЕ репорты...")
-
+        # Выводим HTML первых строк для диагностики названий
         rows = page.query_selector_all("tr")
         print(f"BOT: Строк в таблице: {len(rows)}")
+
+        # Диагностика: смотрим содержимое первых 3 строк
+        for i, row in enumerate(rows[1:4]):
+            cells = row.query_selector_all("td")
+            print(f"  Строка {i+1}: ячеек={len(cells)}")
+            for j, cell in enumerate(cells[:4]):
+                print(f"    td[{j}]: '{cell.inner_text().strip()[:60]}'")
 
         saved_files = []
         for i, row in enumerate(rows):
@@ -104,12 +109,23 @@ def run_bot() -> list:
             if not report_link:
                 continue
 
-            # Название встречи
-            name_el = row.query_selector("td:first-child a, td:first-child")
-            meeting_name = name_el.inner_text().strip() if name_el else f"Meeting_{i}"
-
-            # Дата встречи из строки (для записи в таблицу)
+            # Получаем все ячейки строки
             cells = row.query_selector_all("td")
+
+            # Название встречи — обычно первая ячейка содержит ссылку с именем
+            meeting_name = f"Meeting_{i}"
+            if cells:
+                # Пробуем найти ссылку с названием в первой ячейке
+                name_link = cells[0].query_selector("a")
+                if name_link:
+                    meeting_name = name_link.inner_text().strip()
+                else:
+                    meeting_name = cells[0].inner_text().strip()
+                # Убираем пустые названия
+                if not meeting_name:
+                    meeting_name = f"Meeting_{i}"
+
+            # Дата встречи — вторая ячейка
             meeting_date = cells[1].inner_text().strip() if len(cells) > 1 else ""
 
             print(f"BOT: Скачиваю '{meeting_name}' ({meeting_date})...")
@@ -119,7 +135,8 @@ def run_bot() -> list:
                     report_link.click()
 
                 download = dl_info.value
-                filename = re.sub(r'[\\/*?:"<>|]', "_", f"{meeting_name}_{meeting_date}") + ".csv"
+                safe_name = re.sub(r'[\\/*?:"<>|]', "_", meeting_name)
+                filename = f"{safe_name}_{i}.csv"
                 save_path = os.path.join(download_dir, filename)
                 download.save_as(save_path)
                 print(f"BOT: Сохранён → {save_path}")
@@ -147,8 +164,22 @@ COLUMNS = ["Date", "Name", "Role", "Duration", "Activity Score",
            "Poll Votes", "Raise Hands", "Join", "Left"]
 
 
+def gspread_with_retry(func, *args, retries=5, **kwargs):
+    """Вызывает gspread-функцию с повтором при ошибке 429."""
+    for attempt in range(retries):
+        try:
+            return func(*args, **kwargs)
+        except gspread.exceptions.APIError as e:
+            if "429" in str(e) and attempt < retries - 1:
+                wait = 60 + attempt * 20
+                print(f"  Rate limit — жду {wait} сек...")
+                time.sleep(wait)
+            else:
+                raise
+
+
 def update_sheets(meeting_name: str, meeting_date: str, file_path: str, gc, sh):
-    sheet_name = meeting_name.strip()
+    sheet_name = meeting_name.strip()[:100]  # Google Sheets лимит на имя листа
 
     try:
         df = pd.read_csv(file_path)
@@ -173,23 +204,28 @@ def update_sheets(meeting_name: str, meeting_date: str, file_path: str, gc, sh):
 
     # Открываем или создаём лист
     try:
-        worksheet = sh.worksheet(sheet_name)
+        worksheet = gspread_with_retry(sh.worksheet, sheet_name)
         is_new = len(worksheet.get_all_values()) == 0
     except gspread.exceptions.WorksheetNotFound:
-        worksheet = sh.add_worksheet(title=sheet_name, rows="1000", cols="20")
+        worksheet = gspread_with_retry(
+            sh.add_worksheet, title=sheet_name, rows="1000", cols="20"
+        )
         is_new = True
 
     if is_new:
-        worksheet.update("A1", [available])
+        gspread_with_retry(worksheet.update, values=[available], range_name="A1")
 
     # Разделитель
     separator = [[f"── {meeting_date} ──"] + [""] * (len(available) - 1)]
-    worksheet.append_rows(separator, value_input_option="RAW")
+    gspread_with_retry(worksheet.append_rows, separator, value_input_option="RAW")
 
     # Данные
     rows_data = df.values.tolist()
-    worksheet.append_rows(rows_data, value_input_option="RAW")
+    gspread_with_retry(worksheet.append_rows, rows_data, value_input_option="RAW")
     print(f"  Лист '{sheet_name}': записано {len(rows_data)} строк.")
+
+    # Пауза между листами чтобы не превысить квоту
+    time.sleep(3)
 
 
 # ──────────────────────────────────────────────
