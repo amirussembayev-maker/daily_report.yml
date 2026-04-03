@@ -515,15 +515,26 @@ def format_lesson_block(spreadsheet, worksheet, title_row_number: int, student_r
 def open_product_spreadsheets(gc):
     spreadsheets = {}
     missing = []
+
     for product, env_key in PRODUCT_ENV_KEYS.items():
-        spreadsheet_id = os.getenv(env_key)
+        spreadsheet_id = os.getenv(env_key, "").strip()
         if not spreadsheet_id:
             missing.append(env_key)
             continue
-        spreadsheets[product] = gc.open_by_key(spreadsheet_id)
+
+        print(f"Пробую открыть {product}: {spreadsheet_id}")
+        try:
+            spreadsheets[product] = gc.open_by_key(spreadsheet_id)
+            print(f"ОК: {product}")
+        except Exception as exc:
+            print(f"Ошибка для {product} ({spreadsheet_id}): {exc}")
+            raise
+
     if missing:
         raise ValueError(f"Не заданы переменные окружения: {', '.join(missing)}")
+
     return spreadsheets
+
 
 
 def ensure_meta_sheet(spreadsheet, title: str, columns: list[str]):
