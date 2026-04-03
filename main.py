@@ -33,45 +33,55 @@ def run_bot() -> str:
         page.goto("https://biggerbluebutton.com/login",
                   wait_until="domcontentloaded", timeout=30000)
         page.wait_for_timeout(3000)
-
-        print(f"BOT: URL = {page.url}")
         page.screenshot(path="debug_login_page.png", full_page=True)
+        print(f"BOT: URL = {page.url}")
 
-        # Кликаем на вкладку Sign In (на странице есть Sign In / Sign Up)
-        signin_tab_selectors = [
-            "button:has-text('Sign In')",
-            "a:has-text('Sign In')",
-            "li:has-text('Sign In')",
-            "[role='tab']:has-text('Sign In')",
-            "button:has-text('LOGIN')",
-            "button:has-text('Log In')",
-        ]
-        for sel in signin_tab_selectors:
-            el = page.query_selector(sel)
-            if el and el.is_visible():
-                print(f"BOT: Кликаю на вкладку: {sel}")
-                el.click()
-                page.wait_for_timeout(1000)
-                break
+        # Кликаем на вкладку Sign In
+        btn = page.query_selector("button:has-text('Sign In')")
+        if btn:
+            btn.click()
+            page.wait_for_timeout(1500)
+            print("BOT: Кликнул на Sign In")
 
         page.screenshot(path="debug_signin_tab.png", full_page=True)
 
-        # Ждём пока поле #email станет видимым
-        print("BOT: Жду поле email...")
-        page.wait_for_selector("#email:visible", timeout=10000)
+        # Ищем ВСЕ видимые input на странице
+        print("BOT: Ищу видимые поля...")
+        visible_text = None
+        visible_pass = None
 
-        page.fill('#email', "260401190051930")
+        all_inputs = page.query_selector_all("input")
+        print(f"BOT: Всего input: {len(all_inputs)}")
+        for i, inp in enumerate(all_inputs):
+            t = inp.get_attribute("type") or "text"
+            iid = inp.get_attribute("id") or ""
+            visible = inp.is_visible()
+            print(f"  [{i}] type={t}, id={iid}, visible={visible}")
+            if visible and t in ("text", "email") and visible_text is None:
+                visible_text = inp
+            if visible and t == "password" and visible_pass is None:
+                visible_pass = inp
+
+        if visible_text is None or visible_pass is None:
+            browser.close()
+            raise RuntimeError(
+                f"Не найдены видимые поля! text={visible_text}, pass={visible_pass}. "
+                "Смотри debug_signin_tab.png"
+            )
+
+        visible_text.click()
+        visible_text.fill("260401190051930")
         print("BOT: Логин введён.")
 
-        page.fill('#password', password)
+        visible_pass.click()
+        visible_pass.fill(password)
         print("BOT: Пароль введён.")
 
         page.screenshot(path="debug_before_submit.png")
 
-        # Нажимаем кнопку SIGN IN
+        # Нажимаем SIGN IN
         page.click('button:has-text("SIGN IN")')
         page.wait_for_load_state("networkidle", timeout=20000)
-
         print(f"BOT: После логина URL: {page.url}")
         page.screenshot(path="debug_after_login.png", full_page=True)
 
@@ -90,11 +100,11 @@ def run_bot() -> str:
             f.write(page.content())
         print(f"BOT: Meetings URL: {page.url}")
 
-        # Выводим ссылки для диагностики
+        # Выводим все кнопки/ссылки для диагностики
         links = page.query_selector_all("a, button")
         print(f"BOT: Найдено элементов: {len(links)}")
-        for i, el in enumerate(links[:30]):
-            txt = el.inner_text().strip()[:50]
+        for i, el in enumerate(links[:40]):
+            txt = el.inner_text().strip()[:60]
             href = el.get_attribute("href") or ""
             print(f"  [{i}] text='{txt}', href='{href}'")
 
