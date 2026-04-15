@@ -2,7 +2,7 @@ name: Daily BBB Report
 
 on:
   schedule:
-    - cron: '0 4 * * *'
+    - cron: '0 */2 * * *'
   workflow_dispatch:
     inputs:
       sync_mode:
