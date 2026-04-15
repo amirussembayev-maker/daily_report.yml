@@ -33,13 +33,13 @@
 
     .app {
       display: grid;
-      grid-template-columns: 290px minmax(0, 1fr);
+      grid-template-columns: 300px minmax(0, 1fr);
       min-height: 100vh;
     }
 
     .sidebar {
       padding: 24px;
-      background: rgba(255, 253, 248, 0.86);
+      background: rgba(255, 253, 248, 0.88);
       border-right: 1px solid var(--line);
       position: sticky;
       top: 0;
@@ -71,7 +71,7 @@
 
     .stack { display: grid; gap: 10px; }
 
-    .card, .button, .stat, .lesson, .table-card {
+    .card, .button, .stat, .lesson, .table-card, .chart-card, .student-card {
       border: 1px solid var(--line);
       background: var(--panel);
       border-radius: 18px;
@@ -93,29 +93,6 @@
       display: block;
       margin-bottom: 4px;
       word-break: break-word;
-    }
-
-    .hero {
-      display: grid;
-      gap: 18px;
-      grid-template-columns: 1.4fr 1fr;
-      margin-bottom: 20px;
-    }
-
-    .card { padding: 20px; }
-
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 12px;
-    }
-
-    .stat { padding: 14px; }
-
-    .stat b {
-      display: block;
-      font-size: 26px;
-      margin-top: 8px;
     }
 
     .toolbar {
@@ -140,12 +117,57 @@
       border-color: var(--accent);
     }
 
+    .filters {
+      display: grid;
+      grid-template-columns: minmax(180px, 240px) minmax(220px, 1fr);
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .filters select,
+    .filters input {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(255,255,255,.85);
+      padding: 12px 14px;
+      font-size: 14px;
+      color: var(--text);
+    }
+
+    .hero {
+      display: grid;
+      gap: 18px;
+      grid-template-columns: 1.45fr 1fr;
+      margin-bottom: 20px;
+    }
+
+    .card { padding: 20px; }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(120px, 1fr));
+      gap: 14px;
+    }
+
+    .stat {
+      padding: 18px;
+      min-width: 0;
+    }
+
+    .stat b {
+      display: block;
+      font-size: 28px;
+      margin-top: 10px;
+      line-height: 1.1;
+    }
+
     .month-strip {
       display: flex;
       gap: 10px;
       overflow: auto;
-      margin-bottom: 18px;
       padding-bottom: 4px;
+      margin-bottom: 18px;
     }
 
     .month-pill {
@@ -155,6 +177,54 @@
       color: white;
       background: linear-gradient(135deg, #174e5f, #0f5c5a);
       flex: 0 0 auto;
+    }
+
+    .overview-grid {
+      display: grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap: 18px;
+    }
+
+    .flow-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .flow-item {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 14px;
+      background: rgba(255,255,255,.78);
+    }
+
+    .chart-card {
+      padding: 18px;
+    }
+
+    .chart {
+      display: grid;
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .chart-row {
+      display: grid;
+      grid-template-columns: 72px 1fr auto;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .bar-wrap {
+      height: 14px;
+      border-radius: 999px;
+      background: #efe8d7;
+      overflow: hidden;
+    }
+
+    .bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      border-radius: 999px;
     }
 
     .lessons {
@@ -218,17 +288,17 @@
     .lesson-body {
       padding: 0 18px 18px;
       display: grid;
-      gap: 14px;
+      gap: 16px;
     }
 
     .summary-grid {
       display: grid;
-      grid-template-columns: repeat(5, minmax(140px, 1fr));
-      gap: 10px;
+      grid-template-columns: repeat(5, minmax(150px, 1fr));
+      gap: 14px;
     }
 
     .summary-box {
-      padding: 12px;
+      padding: 16px;
       border-radius: 14px;
       background: #f8f4eb;
       border: 1px solid var(--line);
@@ -237,8 +307,8 @@
 
     .summary-box b {
       display: block;
-      margin-top: 4px;
-      font-size: 22px;
+      margin-top: 6px;
+      font-size: 24px;
     }
 
     .table-card {
@@ -273,12 +343,55 @@
     tr:nth-child(even) td { background: #fcfaf5; }
     tr.teacher td { background: #eef8f5; font-weight: 700; }
 
+    .students-view {
+      display: grid;
+      gap: 14px;
+    }
+
+    .student-card {
+      padding: 18px;
+    }
+
+    .student-card h3 {
+      margin-bottom: 6px;
+    }
+
+    .student-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .student-lessons {
+      margin-top: 14px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .student-lesson-row {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 10px 12px;
+      background: rgba(255,255,255,.74);
+    }
+
     .empty {
       padding: 20px;
       border: 1px dashed var(--line);
       border-radius: 18px;
       color: var(--muted);
       background: rgba(255,255,255,.55);
+    }
+
+    @media (max-width: 1200px) {
+      .hero,
+      .overview-grid,
+      .filters,
+      .stats,
+      .summary-grid {
+        grid-template-columns: 1fr;
+      }
     }
 
     @media (max-width: 1100px) {
@@ -288,11 +401,6 @@
         height: auto;
         border-right: 0;
         border-bottom: 1px solid var(--line);
-      }
-      .hero,
-      .stats,
-      .summary-grid {
-        grid-template-columns: 1fr;
       }
       .content {
         padding: 18px;
@@ -325,6 +433,14 @@
         <button class="chip active" data-view="overview">Overview</button>
         <button class="chip" data-view="lessons">Lessons</button>
         <button class="chip" data-view="payroll">Payroll</button>
+        <button class="chip" data-view="students">Students</button>
+      </div>
+
+      <div class="filters">
+        <select id="flowFilter">
+          <option value="">All flows</option>
+        </select>
+        <input id="studentSearch" type="text" placeholder="Search student by name, surname or email" />
       </div>
 
       <section class="hero">
@@ -340,10 +456,19 @@
           <h3 style="margin-bottom:12px;">Months</h3>
           <div class="month-strip" id="monthStrip"></div>
         </section>
-        <section class="card">
-          <h3 style="margin-bottom:12px;">Flows</h3>
-          <div class="stack" id="flowList"></div>
-        </section>
+
+        <div class="overview-grid">
+          <section class="card">
+            <h3 style="margin-bottom:12px;">Flows</h3>
+            <div class="flow-list" id="flowList"></div>
+          </section>
+
+          <section class="chart-card">
+            <h3>Parallel Load</h3>
+            <div class="muted" style="margin-top:6px;">How many groups and students run in the same hour slot.</div>
+            <div class="chart" id="parallelChart"></div>
+          </section>
+        </div>
       </div>
 
       <div id="lessonsView" style="display:none;">
@@ -390,6 +515,10 @@
           </div>
         </section>
       </div>
+
+      <div id="studentsView" style="display:none;">
+        <div class="students-view" id="studentsList"></div>
+      </div>
     </main>
   </div>
 
@@ -398,7 +527,9 @@
       data: null,
       product: null,
       month: null,
-      view: "overview"
+      view: "overview",
+      flow: "",
+      studentQuery: ""
     };
 
     const nodes = {
@@ -410,31 +541,38 @@
       statsGrid: document.getElementById("statsGrid"),
       monthStrip: document.getElementById("monthStrip"),
       flowList: document.getElementById("flowList"),
+      parallelChart: document.getElementById("parallelChart"),
       lessonList: document.getElementById("lessonList"),
       payrollGroupBody: document.getElementById("payrollGroupBody"),
       payrollTeacherBody: document.getElementById("payrollTeacherBody"),
+      studentsList: document.getElementById("studentsList"),
       overviewView: document.getElementById("overviewView"),
       lessonsView: document.getElementById("lessonsView"),
-      payrollView: document.getElementById("payrollView")
+      payrollView: document.getElementById("payrollView"),
+      studentsView: document.getElementById("studentsView"),
+      flowFilter: document.getElementById("flowFilter"),
+      studentSearch: document.getElementById("studentSearch")
+    };
+
+    const monthNames = {
+      "01": "Январь",
+      "02": "Февраль",
+      "03": "Март",
+      "04": "Апрель",
+      "05": "Май",
+      "06": "Июнь",
+      "07": "Июль",
+      "08": "Август",
+      "09": "Сентябрь",
+      "10": "Октябрь",
+      "11": "Ноябрь",
+      "12": "Декабрь"
     };
 
     const formatMonth = (key) => {
+      if (!key) return "All months";
       const [year, month] = key.split("-");
-      const names = {
-        "01": "Январь",
-        "02": "Февраль",
-        "03": "Март",
-        "04": "Апрель",
-        "05": "Май",
-        "06": "Июнь",
-        "07": "Июль",
-        "08": "Август",
-        "09": "Сентябрь",
-        "10": "Октябрь",
-        "11": "Ноябрь",
-        "12": "Декабрь"
-      };
-      return `${names[month] || month} ${year}`;
+      return `${monthNames[month] || month} ${year}`;
     };
 
     const escapeHtml = (value) =>
@@ -444,6 +582,13 @@
         .replaceAll(">", "&gt;")
         .replaceAll('"', "&quot;");
 
+    const normalize = (value) =>
+      String(value ?? "")
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .trim();
+
     function getProductData() {
       return state.data.products[state.product];
     }
@@ -451,7 +596,11 @@
     function getLessons() {
       const product = getProductData();
       if (!product) return [];
-      return product.lessons.filter((lesson) => !state.month || lesson.month_key === state.month);
+      return product.lessons.filter((lesson) => {
+        const monthOk = !state.month || lesson.month_key === state.month;
+        const flowOk = !state.flow || lesson.flow === state.flow;
+        return monthOk && flowOk;
+      });
     }
 
     function renderProducts() {
@@ -467,6 +616,7 @@
           state.product = el.dataset.product;
           const months = getProductData().months;
           state.month = months.length ? months[0].month_key : null;
+          state.flow = "";
           render();
         });
       });
@@ -474,12 +624,16 @@
 
     function renderMonths() {
       const product = getProductData();
-      nodes.monthList.innerHTML = product.months.map((month) => `
+      const monthItems = [
+        { month_key: "", lesson_count: product.lesson_count, flow_count: product.flow_count }
+      ].concat(product.months);
+
+      nodes.monthList.innerHTML = monthItems.map((month) => `
         <div class="button ${month.month_key === state.month ? "active" : ""}" data-month="${month.month_key}">
-          <strong>${formatMonth(month.month_key)}</strong>
+          <strong>${month.month_key ? formatMonth(month.month_key) : "All months"}</strong>
           <div class="muted">${month.lesson_count} lessons • ${month.flow_count} flows</div>
         </div>
-      `).join("") || '<div class="empty">No months yet.</div>';
+      `).join("");
 
       nodes.monthList.querySelectorAll("[data-month]").forEach((el) => {
         el.addEventListener("click", () => {
@@ -489,14 +643,22 @@
       });
     }
 
+    function renderFlowFilter() {
+      const flows = getProductData().all_flows || [];
+      nodes.flowFilter.innerHTML = `
+        <option value="">All flows</option>
+        ${flows.map((flow) => `<option value="${escapeHtml(flow)}" ${state.flow === flow ? "selected" : ""}>${escapeHtml(flow)}</option>`).join("")}
+      `;
+    }
+
     function renderHero() {
       const lessons = getLessons();
       const flowCount = new Set(lessons.map((lesson) => lesson.flow)).size;
       const teacherCount = new Set(lessons.map((lesson) => lesson.teacher)).size;
       const maxStudents = lessons.reduce((max, lesson) => Math.max(max, Number(lesson.student_count || 0)), 0);
 
-      nodes.heroTitle.textContent = `${state.product} Dashboard${state.month ? " • " + formatMonth(state.month) : ""}`;
-      nodes.heroDescription.textContent = `Публичная витрина по продукту ${state.product}. Можно смотреть уроки, attendance и payroll.`;
+      nodes.heroTitle.textContent = `${state.product} Dashboard${state.month ? " • " + formatMonth(state.month) : ""}${state.flow ? " • " + state.flow : ""}`;
+      nodes.heroDescription.textContent = "Можно смотреть уроки, payroll, одного ученика и общую параллельную нагрузку.";
 
       nodes.statsGrid.innerHTML = [
         ["Lessons", lessons.length],
@@ -527,13 +689,37 @@
 
       nodes.flowList.innerHTML = sortedFlows.length ? sortedFlows.map(([flow, flowLessons]) => {
         const peak = flowLessons.reduce((max, lesson) => Math.max(max, Number(lesson.student_count || 0)), 0);
+        const teachers = new Set(flowLessons.map((lesson) => lesson.teacher)).size;
         return `
-          <div class="button">
+          <div class="flow-item">
             <strong>${escapeHtml(flow)}</strong>
-            <div class="muted">${flowLessons.length} lessons • peak ${peak} students</div>
+            <div class="muted">${flowLessons.length} lessons • ${peak} peak students • ${teachers} teachers</div>
           </div>
         `;
-      }).join("") : '<div class="empty">No lessons for this month yet.</div>';
+      }).join("") : '<div class="empty">No lessons for this selection yet.</div>';
+
+      const load = {};
+      lessons.forEach((lesson) => {
+        const hour = lesson.start_hour || "unknown";
+        if (!load[hour]) {
+          load[hour] = { hour, groups: 0, students: 0 };
+        }
+        load[hour].groups += 1;
+        load[hour].students += Number(lesson.student_count || 0);
+      });
+
+      const rows = Object.values(load).sort((a, b) => a.hour.localeCompare(b.hour));
+      const maxGroups = Math.max(...rows.map((r) => r.groups), 1);
+
+      nodes.parallelChart.innerHTML = rows.length ? rows.map((row) => `
+        <div class="chart-row">
+          <strong>${row.hour}</strong>
+          <div class="bar-wrap">
+            <div class="bar" style="width:${(row.groups / maxGroups) * 100}%"></div>
+          </div>
+          <span class="muted">${row.groups} groups • ${row.students} students</span>
+        </div>
+      `).join("") : '<div class="empty">No parallel load data.</div>';
     }
 
     function lessonTags(lesson) {
@@ -580,6 +766,7 @@
                 <thead>
                   <tr>
                     <th>Name</th>
+                    <th>Email</th>
                     <th>Role</th>
                     <th>Duration</th>
                     <th>Activity</th>
@@ -595,6 +782,7 @@
                   ${lesson.rows.map((row) => `
                     <tr class="${row.role === "Moderator" ? "teacher" : ""}">
                       <td>${escapeHtml(row.name)}</td>
+                      <td>${escapeHtml(row.email || "")}</td>
                       <td>${escapeHtml(row.role)}</td>
                       <td>${escapeHtml(row.duration)}</td>
                       <td>${escapeHtml(row.activity_score)}</td>
@@ -611,12 +799,18 @@
             </div>
           </div>
         </details>
-      `).join("") : '<div class="empty">No lessons for this month yet.</div>';
+      `).join("") : '<div class="empty">No lessons for this selection yet.</div>';
     }
 
     function renderPayroll() {
       const product = getProductData();
-      const byGroup = product.payroll_by_group.filter((row) => !state.month || row.month_key === state.month);
+
+      const byGroup = product.payroll_by_group.filter((row) => {
+        const monthOk = !state.month || row.month_key === state.month;
+        const flowOk = !state.flow || row.group === state.flow;
+        return monthOk && flowOk;
+      });
+
       const byTeacher = product.payroll_by_teacher.filter((row) => !state.month || row.month_key === state.month);
 
       nodes.payrollGroupBody.innerHTML = byGroup.length ? byGroup.map((row) => `
@@ -643,10 +837,105 @@
       `).join("") : '<tr><td colspan="6">No payroll data yet.</td></tr>';
     }
 
+    function buildStudentSearchResults() {
+      const query = normalize(state.studentQuery);
+      if (!query || query.length < 2) {
+        return [];
+      }
+
+      const results = {};
+
+      Object.entries(state.data.products).forEach(([productKey, product]) => {
+        product.lessons.forEach((lesson) => {
+          lesson.rows.forEach((row) => {
+            if (row.role !== "Student") return;
+
+            const haystack = normalize(`${row.name} ${row.email || ""}`);
+            if (!haystack.includes(query)) return;
+
+            const key = `${normalize(row.name)}|${normalize(row.email || "")}`;
+            if (!results[key]) {
+              results[key] = {
+                name: row.name,
+                email: row.email || "",
+                lessons: [],
+                months: new Set(),
+                flows: new Set(),
+                statuses: {},
+              };
+            }
+
+            results[key].lessons.push({
+              product: productKey,
+              flow: lesson.flow,
+              teacher: lesson.teacher,
+              meeting_date: lesson.meeting_date,
+              month_key: lesson.month_key,
+              status: row.status,
+              duration: row.duration,
+              join: row.join,
+              left: row.left,
+            });
+
+            results[key].months.add(lesson.month_key);
+            results[key].flows.add(lesson.flow);
+            results[key].statuses[row.status] = (results[key].statuses[row.status] || 0) + 1;
+          });
+        });
+      });
+
+      return Object.values(results)
+        .map((student) => ({
+          ...student,
+          monthCount: student.months.size,
+          flowCount: student.flows.size,
+          lessonCount: student.lessons.length,
+          lessons: student.lessons.sort((a, b) => b.meeting_date.localeCompare(a.meeting_date)),
+        }))
+        .sort((a, b) => b.lessonCount - a.lessonCount);
+    }
+
+    function renderStudents() {
+      const results = buildStudentSearchResults();
+
+      if (!state.studentQuery || state.studentQuery.trim().length < 2) {
+        nodes.studentsList.innerHTML = '<div class="empty">Type at least 2 characters to search by name, surname or email.</div>';
+        return;
+      }
+
+      nodes.studentsList.innerHTML = results.length ? results.map((student) => `
+        <div class="student-card">
+          <h3>${escapeHtml(student.name)}</h3>
+          <div class="muted">${escapeHtml(student.email || "No email in source data")}</div>
+
+          <div class="student-meta">
+            <span class="tag">${student.lessonCount} lessons</span>
+            <span class="tag good">${student.monthCount} months</span>
+            <span class="tag warn">${student.flowCount} flows</span>
+          </div>
+
+          <div class="student-meta" style="margin-top:12px;">
+            ${Object.entries(student.statuses).map(([status, count]) => `<span class="tag">${escapeHtml(status)}: ${count}</span>`).join("")}
+          </div>
+
+          <div class="student-lessons">
+            ${student.lessons.map((lesson) => `
+              <div class="student-lesson-row">
+                <strong>${escapeHtml(lesson.product)} • ${escapeHtml(lesson.flow)}</strong>
+                <div class="muted">${escapeHtml(lesson.meeting_date)} • Teacher: ${escapeHtml(lesson.teacher)}</div>
+                <div class="muted">Status: ${escapeHtml(lesson.status)} • Duration: ${escapeHtml(lesson.duration)} • Join: ${escapeHtml(lesson.join)} • Left: ${escapeHtml(lesson.left)}</div>
+              </div>
+            `).join("")}
+          </div>
+        </div>
+      `).join("") : '<div class="empty">No students found for this query.</div>';
+    }
+
     function renderView() {
       nodes.overviewView.style.display = state.view === "overview" ? "" : "none";
       nodes.lessonsView.style.display = state.view === "lessons" ? "" : "none";
       nodes.payrollView.style.display = state.view === "payroll" ? "" : "none";
+      nodes.studentsView.style.display = state.view === "students" ? "" : "none";
 
       document.querySelectorAll("[data-view]").forEach((button) => {
         button.classList.toggle("active", button.dataset.view === state.view);
@@ -656,10 +945,12 @@
     function render() {
       renderProducts();
       renderMonths();
+      renderFlowFilter();
       renderHero();
       renderOverview();
       renderLessons();
       renderPayroll();
+      renderStudents();
       renderView();
     }
 
@@ -668,6 +959,19 @@
         state.view = button.dataset.view;
         renderView();
       });
+    });
+
+    nodes.flowFilter.addEventListener("change", (event) => {
+      state.flow = event.target.value;
+      render();
+    });
+
+    nodes.studentSearch.addEventListener("input", (event) => {
+      state.studentQuery = event.target.value;
+      if (state.studentQuery.trim().length >= 2) {
+        state.view = "students";
+      }
+      render();
     });
 
     fetch("./data/dashboard_data.json")
@@ -684,7 +988,7 @@
           throw new Error("dashboard_data.json загружен, но products пустой");
         }
         state.product = products[0];
-        state.month = data.products[state.product]?.months?.[0]?.month_key || null;
+        state.month = data.products[state.product]?.months?.[0]?.month_key || "";
         nodes.generatedAt.textContent = `Updated: ${data.generated_at} (${data.timezone})`;
         render();
       })
@@ -693,8 +997,6 @@
         nodes.heroTitle.textContent = "Loading failed";
         nodes.heroDescription.textContent = error.message;
         nodes.overviewView.innerHTML = `<div class="empty">${escapeHtml(error.message)}</div>`;
-        nodes.lessonsView.innerHTML = "";
-        nodes.payrollView.innerHTML = "";
       });
   </script>
 </body>
