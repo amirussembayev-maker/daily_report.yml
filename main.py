@@ -1,1003 +1,1234 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Attendance Dashboard</title>
-  <style>
-    :root {
-      --bg: #f4efe8;
-      --panel: #fffdf8;
-      --line: #d8ccb7;
-      --text: #1f2933;
-      --muted: #6b7280;
-      --accent: #0f5c5a;
-      --accent-2: #d17b49;
-      --good: #2f7d4d;
-      --warn: #b86c2f;
-      --bad: #b84d38;
-      --shadow: 0 14px 28px rgba(61, 48, 28, 0.08);
-    }
-
-    * { box-sizing: border-box; }
-
-    body {
-      margin: 0;
-      font-family: "Avenir Next", "Segoe UI", sans-serif;
-      background:
-        radial-gradient(circle at top left, rgba(240, 195, 122, 0.24), transparent 25%),
-        radial-gradient(circle at top right, rgba(15, 92, 90, 0.12), transparent 22%),
-        linear-gradient(180deg, #f8f5ef 0%, var(--bg) 100%);
-      color: var(--text);
-    }
-
-    .app {
-      display: grid;
-      grid-template-columns: 300px minmax(0, 1fr);
-      min-height: 100vh;
-    }
-
-    .sidebar {
-      padding: 24px;
-      background: rgba(255, 253, 248, 0.88);
-      border-right: 1px solid var(--line);
-      position: sticky;
-      top: 0;
-      height: 100vh;
-      overflow: auto;
-    }
-
-    .content {
-      padding: 28px;
-      min-width: 0;
-    }
-
-    h1, h2, h3, h4 {
-      margin: 0;
-      font-family: Georgia, "Times New Roman", serif;
-    }
-
-    .muted { color: var(--muted); }
-    .brand { margin-bottom: 24px; }
-    .brand small { color: var(--muted); display: block; margin-bottom: 6px; }
-    .group { margin-bottom: 22px; }
-    .group-title {
-      font-size: 12px;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 10px;
-    }
-
-    .stack { display: grid; gap: 10px; }
-
-    .card, .button, .stat, .lesson, .table-card, .chart-card, .student-card {
-      border: 1px solid var(--line);
-      background: var(--panel);
-      border-radius: 18px;
-      box-shadow: var(--shadow);
-    }
-
-    .button {
-      padding: 12px 14px;
-      cursor: pointer;
-      transition: transform .15s ease, border-color .15s ease;
-    }
-
-    .button.active, .button:hover {
-      border-color: var(--accent-2);
-      transform: translateY(-1px);
-    }
-
-    .button strong {
-      display: block;
-      margin-bottom: 4px;
-      word-break: break-word;
-    }
-
-    .toolbar {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-bottom: 18px;
-    }
-
-    .chip {
-      padding: 10px 14px;
-      border-radius: 999px;
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,.72);
-      cursor: pointer;
-      font-weight: 600;
-    }
-
-    .chip.active {
-      background: var(--accent);
-      color: #fff;
-      border-color: var(--accent);
-    }
-
-    .filters {
-      display: grid;
-      grid-template-columns: minmax(180px, 240px) minmax(220px, 1fr);
-      gap: 12px;
-      margin-bottom: 18px;
-    }
-
-    .filters select,
-    .filters input {
-      width: 100%;
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      background: rgba(255,255,255,.85);
-      padding: 12px 14px;
-      font-size: 14px;
-      color: var(--text);
-    }
-
-    .hero {
-      display: grid;
-      gap: 18px;
-      grid-template-columns: 1.45fr 1fr;
-      margin-bottom: 20px;
-    }
-
-    .card { padding: 20px; }
-
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(120px, 1fr));
-      gap: 14px;
-    }
-
-    .stat {
-      padding: 18px;
-      min-width: 0;
-    }
-
-    .stat b {
-      display: block;
-      font-size: 28px;
-      margin-top: 10px;
-      line-height: 1.1;
-    }
-
-    .month-strip {
-      display: flex;
-      gap: 10px;
-      overflow: auto;
-      padding-bottom: 4px;
-      margin-bottom: 18px;
-    }
-
-    .month-pill {
-      min-width: 220px;
-      padding: 14px 16px;
-      border-radius: 18px;
-      color: white;
-      background: linear-gradient(135deg, #174e5f, #0f5c5a);
-      flex: 0 0 auto;
-    }
-
-    .overview-grid {
-      display: grid;
-      grid-template-columns: 1.2fr .8fr;
-      gap: 18px;
-    }
-
-    .flow-list {
-      display: grid;
-      gap: 10px;
-    }
-
-    .flow-item {
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      padding: 14px;
-      background: rgba(255,255,255,.78);
-    }
-
-    .chart-card {
-      padding: 18px;
-    }
-
-    .chart {
-      display: grid;
-      gap: 12px;
-      margin-top: 12px;
-    }
-
-    .chart-row {
-      display: grid;
-      grid-template-columns: 72px 1fr auto;
-      gap: 10px;
-      align-items: center;
-    }
-
-    .bar-wrap {
-      height: 14px;
-      border-radius: 999px;
-      background: #efe8d7;
-      overflow: hidden;
-    }
+import hashlib
+import json
+import os
+import re
+import time
+from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
+
+import gspread
+import pandas as pd
+from playwright.sync_api import sync_playwright
+
+
+APP_TIMEZONE = ZoneInfo(os.getenv("REPORT_TIMEZONE", "Asia/Almaty"))
+
+SHEET_COLUMNS = [
+    "Name",
+    "Role",
+    "Duration",
+    "Activity Score",
+    "Talk Time",
+    "Webcam Time",
+    "Messages",
+    "Reactions",
+    "Poll Votes",
+    "Raise Hands",
+    "Join",
+    "Left",
+    "Status",
+]
+
+EXPORT_COLUMNS = SHEET_COLUMNS + ["Email"]
+
+PRODUCT_ENV_KEYS = {
+    "IELTS": "GOOGLE_SHEET_IELTS",
+    "RTI": "GOOGLE_SHEET_RTI",
+    "RTN": "GOOGLE_SHEET_RTN",
+    "VIP": "GOOGLE_SHEET_VIP",
+    "NUET": "GOOGLE_SHEET_NUET",
+}
+
+PRODUCT_ALIASES = {
+    "IELTS": ["IELTS"],
+    "RTI": ["RTI"],
+    "RTN": ["RTN"],
+    "VIP": ["VIP"],
+    "NUET": ["NUET"],
+}
+
+LESSON_INDEX_COLUMNS = [
+    "Lesson ID",
+    "Product",
+    "Flow",
+    "Month Key",
+    "Meeting Name",
+    "Meeting Date",
+    "Teacher",
+    "Sheet Name",
+    "Student Count",
+    "Inserted At",
+]
+
+PAYROLL_LOG_COLUMNS = [
+    "Lesson ID",
+    "Month Key",
+    "Product",
+    "Flow",
+    "Meeting Name",
+    "Meeting Date",
+    "Teacher",
+    "Student Count",
+]
+
+LESSON_ARCHIVE_COLUMNS = [
+    "Lesson ID",
+    "Month Key",
+    "Product",
+    "Flow",
+    "Meeting Name",
+    "Meeting Date",
+    "Teacher",
+    "Student Count",
+    "Lesson Payload",
+]
+
+
+def gspread_with_retry(func, *args, retries=5, **kwargs):
+    retriable_codes = ("429", "500", "502", "503", "504")
+    for attempt in range(retries):
+        try:
+            return func(*args, **kwargs)
+        except gspread.exceptions.APIError as exc:
+            message = str(exc)
+            if any(code in message for code in retriable_codes) and attempt < retries - 1:
+                wait = 20 + attempt * 15
+                print(f"  Google API временно недоступен — жду {wait} сек...")
+                time.sleep(wait)
+            else:
+                raise
+
+
+def safe_batch_update(spreadsheet, body: dict):
+    return gspread_with_retry(spreadsheet.batch_update, body)
 
-    .bar {
-      height: 100%;
-      background: linear-gradient(90deg, var(--accent), var(--accent-2));
-      border-radius: 999px;
-    }
-
-    .lessons {
-      display: grid;
-      gap: 14px;
-    }
-
-    .lesson {
-      overflow: hidden;
-    }
-
-    .lesson summary {
-      list-style: none;
-      cursor: pointer;
-      padding: 18px;
-      background: linear-gradient(90deg, rgba(240,195,122,.22), rgba(255,255,255,0));
-    }
-
-    .lesson summary::-webkit-details-marker { display: none; }
-
-    .lesson-head {
-      display: flex;
-      justify-content: space-between;
-      gap: 16px;
-      align-items: flex-start;
-      flex-wrap: wrap;
-    }
-
-    .lesson-head > div:first-child {
-      min-width: 260px;
-      flex: 1 1 380px;
-    }
-
-    .lesson-head h3 {
-      word-break: break-word;
-      line-height: 1.2;
-    }
-
-    .lesson-tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      justify-content: flex-end;
-      flex: 1 1 260px;
-    }
-
-    .tag {
-      padding: 5px 10px;
-      border-radius: 999px;
-      font-size: 12px;
-      font-weight: 700;
-      background: #efe8d7;
-      color: #5c4732;
-      white-space: nowrap;
-    }
-
-    .tag.good { background: #dfefe4; color: var(--good); }
-    .tag.warn { background: #f7e6d8; color: var(--warn); }
-    .tag.bad { background: #f7dddd; color: var(--bad); }
-
-    .lesson-body {
-      padding: 0 18px 18px;
-      display: grid;
-      gap: 16px;
-    }
-
-    .summary-grid {
-      display: grid;
-      grid-template-columns: repeat(5, minmax(150px, 1fr));
-      gap: 14px;
-    }
-
-    .summary-box {
-      padding: 16px;
-      border-radius: 14px;
-      background: #f8f4eb;
-      border: 1px solid var(--line);
-      min-width: 0;
-    }
-
-    .summary-box b {
-      display: block;
-      margin-top: 6px;
-      font-size: 24px;
-    }
-
-    .table-card {
-      overflow: auto;
-      max-height: 420px;
-      min-width: 0;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      min-width: 980px;
-    }
 
-    th, td {
-      padding: 10px;
-      border-top: 1px solid #eee6d7;
-      text-align: left;
-      white-space: nowrap;
-    }
-
-    th {
-      position: sticky;
-      top: 0;
-      background: #214f65;
-      color: white;
-      z-index: 1;
-      font-size: 13px;
-      letter-spacing: .02em;
-    }
-
-    tr:nth-child(even) td { background: #fcfaf5; }
-    tr.teacher td { background: #eef8f5; font-weight: 700; }
-
-    .students-view {
-      display: grid;
-      gap: 14px;
-    }
-
-    .student-card {
-      padding: 18px;
-    }
-
-    .student-card h3 {
-      margin-bottom: 6px;
-    }
-
-    .student-meta {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 10px;
-    }
-
-    .student-lessons {
-      margin-top: 14px;
-      display: grid;
-      gap: 8px;
-    }
-
-    .student-lesson-row {
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      padding: 10px 12px;
-      background: rgba(255,255,255,.74);
-    }
-
-    .empty {
-      padding: 20px;
-      border: 1px dashed var(--line);
-      border-radius: 18px;
-      color: var(--muted);
-      background: rgba(255,255,255,.55);
-    }
+def safe_sheet_title(title: str, fallback: str = "Sheet") -> str:
+    cleaned = re.sub(r"[\[\]\*:/\\?]", " ", title)
+    cleaned = re.sub(r"\s+", " ", cleaned).strip()
+    return (cleaned or fallback)[:100]
 
-    @media (max-width: 1200px) {
-      .hero,
-      .overview-grid,
-      .filters,
-      .stats,
-      .summary-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    @media (max-width: 1100px) {
-      .app { grid-template-columns: 1fr; }
-      .sidebar {
-        position: static;
-        height: auto;
-        border-right: 0;
-        border-bottom: 1px solid var(--line);
-      }
-      .content {
-        padding: 18px;
-      }
-    }
-  </style>
-</head>
-<body>
-  <div class="app">
-    <aside class="sidebar">
-      <div class="brand">
-        <small>Live dashboard</small>
-        <h1>Attendance Dashboard</h1>
-        <div class="muted" id="generatedAt">Загрузка данных...</div>
-      </div>
-
-      <div class="group">
-        <div class="group-title">Products</div>
-        <div class="stack" id="productList"></div>
-      </div>
-
-      <div class="group">
-        <div class="group-title">Months</div>
-        <div class="stack" id="monthList"></div>
-      </div>
-    </aside>
-
-    <main class="content">
-      <div class="toolbar">
-        <button class="chip active" data-view="overview">Overview</button>
-        <button class="chip" data-view="lessons">Lessons</button>
-        <button class="chip" data-view="payroll">Payroll</button>
-        <button class="chip" data-view="students">Students</button>
-      </div>
-
-      <div class="filters">
-        <select id="flowFilter">
-          <option value="">All flows</option>
-        </select>
-        <input id="studentSearch" type="text" placeholder="Search student by name, surname or email" />
-      </div>
-
-      <section class="hero">
-        <div class="card">
-          <h2 id="heroTitle">Loading...</h2>
-          <p class="muted" id="heroDescription"></p>
-        </div>
-        <div class="stats" id="statsGrid"></div>
-      </section>
-
-      <div id="overviewView">
-        <section class="card" style="margin-bottom:18px;">
-          <h3 style="margin-bottom:12px;">Months</h3>
-          <div class="month-strip" id="monthStrip"></div>
-        </section>
-
-        <div class="overview-grid">
-          <section class="card">
-            <h3 style="margin-bottom:12px;">Flows</h3>
-            <div class="flow-list" id="flowList"></div>
-          </section>
-
-          <section class="chart-card">
-            <h3>Parallel Load</h3>
-            <div class="muted" style="margin-top:6px;">How many groups and students run in the same hour slot.</div>
-            <div class="chart" id="parallelChart"></div>
-          </section>
-        </div>
-      </div>
-
-      <div id="lessonsView" style="display:none;">
-        <div class="lessons" id="lessonList"></div>
-      </div>
-
-      <div id="payrollView" style="display:none;">
-        <section class="card" style="margin-bottom:18px;">
-          <h3 style="margin-bottom:12px;">By Group</h3>
-          <div class="table-card">
-            <table>
-              <thead>
-                <tr>
-                  <th>Group</th>
-                  <th>Main teacher</th>
-                  <th>Main lessons</th>
-                  <th>Replacement</th>
-                  <th>Replacement lessons</th>
-                  <th>Dates</th>
-                  <th>Total</th>
-                </tr>
-              </thead>
-              <tbody id="payrollGroupBody"></tbody>
-            </table>
-          </div>
-        </section>
-
-        <section class="card">
-          <h3 style="margin-bottom:12px;">By Teacher</h3>
-          <div class="table-card">
-            <table>
-              <thead>
-                <tr>
-                  <th>Teacher</th>
-                  <th>Total lessons</th>
-                  <th>Main lessons</th>
-                  <th>Replacement lessons</th>
-                  <th>Groups</th>
-                  <th>Replacement dates</th>
-                </tr>
-              </thead>
-              <tbody id="payrollTeacherBody"></tbody>
-            </table>
-          </div>
-        </section>
-      </div>
-
-      <div id="studentsView" style="display:none;">
-        <div class="students-view" id="studentsList"></div>
-      </div>
-    </main>
-  </div>
-
-  <script>
-    const state = {
-      data: null,
-      product: null,
-      month: null,
-      view: "overview",
-      flow: "",
-      studentQuery: ""
-    };
-
-    const nodes = {
-      productList: document.getElementById("productList"),
-      monthList: document.getElementById("monthList"),
-      generatedAt: document.getElementById("generatedAt"),
-      heroTitle: document.getElementById("heroTitle"),
-      heroDescription: document.getElementById("heroDescription"),
-      statsGrid: document.getElementById("statsGrid"),
-      monthStrip: document.getElementById("monthStrip"),
-      flowList: document.getElementById("flowList"),
-      parallelChart: document.getElementById("parallelChart"),
-      lessonList: document.getElementById("lessonList"),
-      payrollGroupBody: document.getElementById("payrollGroupBody"),
-      payrollTeacherBody: document.getElementById("payrollTeacherBody"),
-      studentsList: document.getElementById("studentsList"),
-      overviewView: document.getElementById("overviewView"),
-      lessonsView: document.getElementById("lessonsView"),
-      payrollView: document.getElementById("payrollView"),
-      studentsView: document.getElementById("studentsView"),
-      flowFilter: document.getElementById("flowFilter"),
-      studentSearch: document.getElementById("studentSearch")
-    };
-
-    const monthNames = {
-      "01": "Январь",
-      "02": "Февраль",
-      "03": "Март",
-      "04": "Апрель",
-      "05": "Май",
-      "06": "Июнь",
-      "07": "Июль",
-      "08": "Август",
-      "09": "Сентябрь",
-      "10": "Октябрь",
-      "11": "Ноябрь",
-      "12": "Декабрь"
-    };
-
-    const formatMonth = (key) => {
-      if (!key) return "All months";
-      const [year, month] = key.split("-");
-      return `${monthNames[month] || month} ${year}`;
-    };
-
-    const escapeHtml = (value) =>
-      String(value ?? "")
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;");
-
-    const normalize = (value) =>
-      String(value ?? "")
-        .toLowerCase()
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .trim();
-
-    function getProductData() {
-      return state.data.products[state.product];
-    }
 
-    function getLessons() {
-      const product = getProductData();
-      if (!product) return [];
-      return product.lessons.filter((lesson) => {
-        const monthOk = !state.month || lesson.month_key === state.month;
-        const flowOk = !state.flow || lesson.flow === state.flow;
-        return monthOk && flowOk;
-      });
-    }
+def parse_meeting_datetime(meeting_date: str) -> datetime:
+    normalized = meeting_date.strip()
+    normalized = re.sub(r"(\d{1,2})(st|nd|rd|th)", r"\1", normalized, flags=re.IGNORECASE)
+    patterns = [
+        "%B %d %Y, %I:%M:%S %p",
+        "%B %d, %Y, %I:%M:%S %p",
+        "%b %d %Y, %I:%M:%S %p",
+        "%b %d, %Y, %I:%M:%S %p",
+    ]
+    for pattern in patterns:
+        try:
+            return datetime.strptime(normalized, pattern)
+        except ValueError:
+            continue
+    raise ValueError(f"Не удалось распарсить дату встречи: '{meeting_date}'")
 
-    function renderProducts() {
-      nodes.productList.innerHTML = Object.entries(state.data.products).map(([key, product]) => `
-        <div class="button ${key === state.product ? "active" : ""}" data-product="${key}">
-          <strong>${key}</strong>
-          <div class="muted">${product.lesson_count} lessons • ${product.flow_count} flows</div>
-        </div>
-      `).join("");
-
-      nodes.productList.querySelectorAll("[data-product]").forEach((el) => {
-        el.addEventListener("click", () => {
-          state.product = el.dataset.product;
-          const months = getProductData().months;
-          state.month = months.length ? months[0].month_key : null;
-          state.flow = "";
-          render();
-        });
-      });
-    }
 
-    function renderMonths() {
-      const product = getProductData();
-      const monthItems = [
-        { month_key: "", lesson_count: product.lesson_count, flow_count: product.flow_count }
-      ].concat(product.months);
-
-      nodes.monthList.innerHTML = monthItems.map((month) => `
-        <div class="button ${month.month_key === state.month ? "active" : ""}" data-month="${month.month_key}">
-          <strong>${month.month_key ? formatMonth(month.month_key) : "All months"}</strong>
-          <div class="muted">${month.lesson_count} lessons • ${month.flow_count} flows</div>
-        </div>
-      `).join("");
-
-      nodes.monthList.querySelectorAll("[data-month]").forEach((el) => {
-        el.addEventListener("click", () => {
-          state.month = el.dataset.month;
-          render();
-        });
-      });
-    }
+def load_runtime_config() -> dict:
+    mode = (os.getenv("SYNC_MODE") or "daily").strip().lower()
+    start_raw = os.getenv("REPORT_START_DATE", "").strip()
+    end_raw = os.getenv("REPORT_END_DATE", "").strip()
 
-    function renderFlowFilter() {
-      const flows = getProductData().all_flows || [];
-      nodes.flowFilter.innerHTML = `
-        <option value="">All flows</option>
-        ${flows.map((flow) => `<option value="${escapeHtml(flow)}" ${state.flow === flow ? "selected" : ""}>${escapeHtml(flow)}</option>`).join("")}
-      `;
-    }
+    if mode not in {"daily", "backfill", "all"}:
+        raise ValueError("SYNC_MODE должен быть daily, backfill или all")
 
-    function renderHero() {
-      const lessons = getLessons();
-      const flowCount = new Set(lessons.map((lesson) => lesson.flow)).size;
-      const teacherCount = new Set(lessons.map((lesson) => lesson.teacher)).size;
-      const maxStudents = lessons.reduce((max, lesson) => Math.max(max, Number(lesson.student_count || 0)), 0);
-
-      nodes.heroTitle.textContent = `${state.product} Dashboard${state.month ? " • " + formatMonth(state.month) : ""}${state.flow ? " • " + state.flow : ""}`;
-      nodes.heroDescription.textContent = "Можно смотреть уроки, payroll, одного ученика и общую параллельную нагрузку.";
-
-      nodes.statsGrid.innerHTML = [
-        ["Lessons", lessons.length],
-        ["Flows", flowCount],
-        ["Teachers", teacherCount],
-        ["Peak students", maxStudents]
-      ].map(([label, value]) => `<div class="stat">${label}<b>${value}</b></div>`).join("");
-
-      nodes.monthStrip.innerHTML = getProductData().months.map((month) => `
-        <div class="month-pill">
-          <small style="display:block;opacity:.8;">Month</small>
-          <strong>${formatMonth(month.month_key)}</strong>
-          ${month.lesson_count} lessons • ${month.flow_count} flows
-        </div>
-      `).join("");
-    }
+    start_date = datetime.strptime(start_raw, "%Y-%m-%d").date() if start_raw else None
+    end_date = datetime.strptime(end_raw, "%Y-%m-%d").date() if end_raw else None
 
-    function renderOverview() {
-      const lessons = getLessons();
-      const flows = {};
-
-      lessons.forEach((lesson) => {
-        if (!flows[lesson.flow]) flows[lesson.flow] = [];
-        flows[lesson.flow].push(lesson);
-      });
-
-      const sortedFlows = Object.entries(flows).sort((a, b) => b[1].length - a[1].length);
-
-      nodes.flowList.innerHTML = sortedFlows.length ? sortedFlows.map(([flow, flowLessons]) => {
-        const peak = flowLessons.reduce((max, lesson) => Math.max(max, Number(lesson.student_count || 0)), 0);
-        const teachers = new Set(flowLessons.map((lesson) => lesson.teacher)).size;
-        return `
-          <div class="flow-item">
-            <strong>${escapeHtml(flow)}</strong>
-            <div class="muted">${flowLessons.length} lessons • ${peak} peak students • ${teachers} teachers</div>
-          </div>
-        `;
-      }).join("") : '<div class="empty">No lessons for this selection yet.</div>';
-
-      const load = {};
-      lessons.forEach((lesson) => {
-        const hour = lesson.start_hour || "unknown";
-        if (!load[hour]) {
-          load[hour] = { hour, groups: 0, students: 0 };
-        }
-        load[hour].groups += 1;
-        load[hour].students += Number(lesson.student_count || 0);
-      });
-
-      const rows = Object.values(load).sort((a, b) => a.hour.localeCompare(b.hour));
-      const maxGroups = Math.max(...rows.map((r) => r.groups), 1);
-
-      nodes.parallelChart.innerHTML = rows.length ? rows.map((row) => `
-        <div class="chart-row">
-          <strong>${row.hour}</strong>
-          <div class="bar-wrap">
-            <div class="bar" style="width:${(row.groups / maxGroups) * 100}%"></div>
-          </div>
-          <span class="muted">${row.groups} groups • ${row.students} students</span>
-        </div>
-      `).join("") : '<div class="empty">No parallel load data.</div>';
-    }
+    if mode == "daily" and not start_date and not end_date:
+        today_local = datetime.now(APP_TIMEZONE).date()
+        target_date = today_local - timedelta(days=1)
+        start_date = target_date
+        end_date = target_date
 
-    function lessonTags(lesson) {
-      const counts = lesson.status_counts || {};
-      const full = counts["Full lesson"] || 0;
-      const late = counts["Late"] || 0;
-      const leftEarly = counts["Left early"] || 0;
-      const mixed = counts["Late + Left early"] || 0;
-
-      return `
-        <span class="tag">${lesson.student_count} students</span>
-        <span class="tag good">${full} full</span>
-        <span class="tag warn">${late + mixed} late</span>
-        <span class="tag bad">${leftEarly + mixed} left early</span>
-      `;
-    }
+    if start_date and not end_date:
+        end_date = start_date
+    if end_date and not start_date:
+        start_date = end_date
+    if start_date and end_date and start_date > end_date:
+        raise ValueError("REPORT_START_DATE не может быть позже REPORT_END_DATE")
 
-    function renderLessons() {
-      const lessons = getLessons();
-
-      nodes.lessonList.innerHTML = lessons.length ? lessons.map((lesson, index) => `
-        <details class="lesson" ${index === 0 ? "open" : ""}>
-          <summary>
-            <div class="lesson-head">
-              <div>
-                <h3>${escapeHtml(lesson.flow)} • ${escapeHtml(lesson.meeting_date)}</h3>
-                <div class="muted">Teacher: ${escapeHtml(lesson.teacher)} • ${escapeHtml(lesson.meeting_name)}</div>
-              </div>
-              <div class="lesson-tags">${lessonTags(lesson)}</div>
-            </div>
-          </summary>
-
-          <div class="lesson-body">
-            <div class="summary-grid">
-              <div class="summary-box">Students<b>${lesson.student_count}</b></div>
-              <div class="summary-box">Moderators<b>${lesson.moderator_count}</b></div>
-              <div class="summary-box">Full lesson<b>${lesson.status_counts?.["Full lesson"] || 0}</b></div>
-              <div class="summary-box">Late<b>${(lesson.status_counts?.["Late"] || 0) + (lesson.status_counts?.["Late + Left early"] || 0)}</b></div>
-              <div class="summary-box">Left early<b>${(lesson.status_counts?.["Left early"] || 0) + (lesson.status_counts?.["Late + Left early"] || 0)}</b></div>
-            </div>
-
-            <div class="table-card">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Role</th>
-                    <th>Duration</th>
-                    <th>Activity</th>
-                    <th>Talk</th>
-                    <th>Webcam</th>
-                    <th>Messages</th>
-                    <th>Join</th>
-                    <th>Left</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${lesson.rows.map((row) => `
-                    <tr class="${row.role === "Moderator" ? "teacher" : ""}">
-                      <td>${escapeHtml(row.name)}</td>
-                      <td>${escapeHtml(row.email || "")}</td>
-                      <td>${escapeHtml(row.role)}</td>
-                      <td>${escapeHtml(row.duration)}</td>
-                      <td>${escapeHtml(row.activity_score)}</td>
-                      <td>${escapeHtml(row.talk_time)}</td>
-                      <td>${escapeHtml(row.webcam_time)}</td>
-                      <td>${escapeHtml(row.messages)}</td>
-                      <td>${escapeHtml(row.join)}</td>
-                      <td>${escapeHtml(row.left)}</td>
-                      <td>${escapeHtml(row.status)}</td>
-                    </tr>
-                  `).join("")}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </details>
-      `).join("") : '<div class="empty">No lessons for this selection yet.</div>';
+    return {
+        "mode": mode,
+        "start_date": start_date,
+        "end_date": end_date,
     }
 
-    function renderPayroll() {
-      const product = getProductData();
-
-      const byGroup = product.payroll_by_group.filter((row) => {
-        const monthOk = !state.month || row.month_key === state.month;
-        const flowOk = !state.flow || row.group === state.flow;
-        return monthOk && flowOk;
-      });
-
-      const byTeacher = product.payroll_by_teacher.filter((row) => !state.month || row.month_key === state.month);
-
-      nodes.payrollGroupBody.innerHTML = byGroup.length ? byGroup.map((row) => `
-        <tr>
-          <td>${escapeHtml(row.group)}</td>
-          <td>${escapeHtml(row.main_teacher)}</td>
-          <td>${row.main_lessons}</td>
-          <td>${escapeHtml(row.replacement_teacher)}</td>
-          <td>${row.replacement_lessons}</td>
-          <td>${escapeHtml(row.replacement_dates)}</td>
-          <td>${row.total_lessons}</td>
-        </tr>
-      `).join("") : '<tr><td colspan="7">No payroll data yet.</td></tr>';
-
-      nodes.payrollTeacherBody.innerHTML = byTeacher.length ? byTeacher.map((row) => `
-        <tr>
-          <td>${escapeHtml(row.teacher)}</td>
-          <td>${row.total_lessons}</td>
-          <td>${row.main_lessons}</td>
-          <td>${row.replacement_lessons}</td>
-          <td>${escapeHtml(row.groups)}</td>
-          <td>${escapeHtml(row.replacement_dates)}</td>
-        </tr>
-      `).join("") : '<tr><td colspan="6">No payroll data yet.</td></tr>';
-    }
 
-    function buildStudentSearchResults() {
-      const query = normalize(state.studentQuery);
-      if (!query || query.length < 2) {
-        return [];
-      }
-
-      const results = {};
-
-      Object.entries(state.data.products).forEach(([productKey, product]) => {
-        product.lessons.forEach((lesson) => {
-          lesson.rows.forEach((row) => {
-            if (row.role !== "Student") return;
-
-            const haystack = normalize(`${row.name} ${row.email || ""}`);
-            if (!haystack.includes(query)) return;
-
-            const key = `${normalize(row.name)}|${normalize(row.email || "")}`;
-            if (!results[key]) {
-              results[key] = {
-                name: row.name,
-                email: row.email || "",
-                lessons: [],
-                months: new Set(),
-                flows: new Set(),
-                statuses: {},
-              };
+def is_in_range(meeting_dt: datetime, config: dict) -> bool:
+    if config["mode"] == "all":
+        return True
+    if not config["start_date"] or not config["end_date"]:
+        return True
+    return config["start_date"] <= meeting_dt.date() <= config["end_date"]
+
+
+def detect_product(meeting_name: str) -> str | None:
+    normalized = meeting_name.upper()
+    for product, aliases in PRODUCT_ALIASES.items():
+        if any(alias in normalized for alias in aliases):
+            return product
+    return None
+
+
+def build_month_key(meeting_dt: datetime) -> str:
+    return meeting_dt.strftime("%Y-%m")
+
+
+def normalize_flow_name(meeting_name: str) -> str:
+    cleaned = re.sub(r"\s+", " ", meeting_name).strip()
+    return cleaned[:80]
+
+
+def build_flow_month_sheet_name(flow_name: str, meeting_dt: datetime) -> str:
+    return safe_sheet_title(f"{flow_name} | {build_month_key(meeting_dt)}", flow_name)
+
+
+def compute_lesson_id(product: str, flow_name: str, meeting_dt: datetime) -> str:
+    payload = f"{product}|{flow_name}|{meeting_dt.isoformat()}"
+    return hashlib.sha1(payload.encode("utf-8")).hexdigest()[:16]
+
+
+def parse_duration_to_seconds(value) -> int:
+    if pd.isna(value):
+        return 0
+    text = str(value).strip()
+    if not text or text == "-":
+        return 0
+    parts = text.split(":")
+    if len(parts) != 3:
+        return 0
+    try:
+        hours, minutes, seconds = [int(part) for part in parts]
+    except ValueError:
+        return 0
+    return hours * 3600 + minutes * 60 + seconds
+
+
+def parse_datetime_series(series: pd.Series) -> pd.Series:
+    return pd.to_datetime(series, errors="coerce")
+
+
+def derive_attendance_status(join_ts, left_ts, duration_seconds: int, lesson_start_ts, lesson_end_ts) -> str:
+    if duration_seconds <= 0:
+        return "No data"
+
+    late = False
+    left_early = False
+
+    if pd.notna(join_ts) and pd.notna(lesson_start_ts):
+        late = (join_ts - lesson_start_ts).total_seconds() > 10 * 60
+
+    if pd.notna(left_ts) and pd.notna(lesson_end_ts):
+        left_early = (lesson_end_ts - left_ts).total_seconds() > 10 * 60
+
+    if late and left_early:
+        return "Late + Left early"
+    if late:
+        return "Late"
+    if left_early:
+        return "Left early"
+    return "Full lesson"
+
+
+def detect_email_column(df: pd.DataFrame) -> str | None:
+    candidates = [
+        "Email",
+        "E-mail",
+        "Email Address",
+        "Primary Email",
+        "User Email",
+        "Participant Email",
+    ]
+    for column in candidates:
+        if column in df.columns:
+            return column
+    return None
+
+
+def pick_teacher_name(df: pd.DataFrame) -> str:
+    moderators = df[df["Role"] == "Moderator"].copy()
+    if moderators.empty:
+        return "Unknown"
+
+    moderators["Talk Seconds"] = moderators["Talk Time"].apply(parse_duration_to_seconds)
+    moderators["Webcam Seconds"] = moderators["Webcam Time"].apply(parse_duration_to_seconds)
+    moderators["Duration Seconds"] = moderators["Duration"].apply(parse_duration_to_seconds)
+    moderators["Messages Num"] = pd.to_numeric(moderators["Messages"], errors="coerce").fillna(0)
+    moderators["JoinParsed"] = parse_datetime_series(moderators["Join"])
+
+    moderators = moderators.sort_values(
+        by=["Talk Seconds", "Webcam Seconds", "Messages Num", "Duration Seconds", "JoinParsed"],
+        ascending=[False, False, False, False, True],
+        na_position="last",
+    )
+    return str(moderators.iloc[0]["Name"]).strip() or "Unknown"
+
+
+def prepare_dataframe(file_path: str) -> pd.DataFrame:
+    df = pd.read_csv(file_path)
+    df = df[df["Name"].notna() & (df["Name"].astype(str).str.strip() != "Anonymous")].copy()
+    if df.empty:
+        return df
+
+    df["Role"] = df["Moderator"].apply(
+        lambda value: "Moderator" if str(value).upper() == "TRUE" else "Student"
+    )
+
+    email_source = detect_email_column(df)
+    if email_source:
+        df["Email"] = df[email_source].fillna("").astype(str).str.strip()
+    else:
+        df["Email"] = ""
+
+    for column in SHEET_COLUMNS:
+        if column not in df.columns:
+            df[column] = ""
+
+    df["Name"] = df["Name"].astype(str).str.strip()
+    df["JoinParsed"] = parse_datetime_series(df["Join"])
+    df["LeftParsed"] = parse_datetime_series(df["Left"])
+    df["Duration Seconds"] = df["Duration"].apply(parse_duration_to_seconds)
+
+    lesson_start_ts = df["JoinParsed"].min()
+    lesson_end_ts = df["LeftParsed"].max()
+
+    df["Status"] = df.apply(
+        lambda row: "Teacher"
+        if row["Role"] == "Moderator"
+        else derive_attendance_status(
+            row["JoinParsed"],
+            row["LeftParsed"],
+            int(row["Duration Seconds"]),
+            lesson_start_ts,
+            lesson_end_ts,
+        ),
+        axis=1,
+    )
+
+    df["RoleSort"] = df["Role"].map({"Moderator": 0, "Student": 1}).fillna(2)
+    df = df.sort_values(
+        by=["RoleSort", "JoinParsed", "Name"],
+        ascending=[True, True, True],
+        na_position="last",
+    )
+
+    for column in ["Join", "Left", "Talk Time", "Webcam Time"]:
+        df[column] = df[column].fillna("")
+
+    return df[EXPORT_COLUMNS].copy()
+
+
+def build_lesson_title(flow_name: str, meeting_dt: datetime, teacher_name: str, student_count: int) -> str:
+    return (
+        f"{flow_name} | {meeting_dt.strftime('%d.%m.%Y %H:%M')} | "
+        f"Teacher: {teacher_name} | Students: {student_count}"
+    )
+
+
+def ensure_worksheet(spreadsheet, title: str, rows: int = 2000, cols: int = 20):
+    safe_title = safe_sheet_title(title)
+    try:
+        worksheet = gspread_with_retry(spreadsheet.worksheet, safe_title)
+        created = False
+    except gspread.exceptions.WorksheetNotFound:
+        worksheet = gspread_with_retry(
+            spreadsheet.add_worksheet,
+            title=safe_title,
+            rows=str(rows),
+            cols=str(cols),
+        )
+        created = True
+    return worksheet, created
+
+
+def ensure_header(worksheet, header_values: list[str]):
+    first_row = gspread_with_retry(worksheet.row_values, 1)
+    if first_row != header_values:
+        gspread_with_retry(worksheet.update, range_name="A1", values=[header_values])
+
+
+def apply_sheet_basics(spreadsheet, worksheet, header_len: int):
+    requests = [
+        {
+            "updateSheetProperties": {
+                "properties": {
+                    "sheetId": worksheet.id,
+                    "gridProperties": {"frozenRowCount": 1},
+                },
+                "fields": "gridProperties.frozenRowCount",
             }
+        },
+        {
+            "setBasicFilter": {
+                "filter": {
+                    "range": {
+                        "sheetId": worksheet.id,
+                        "startRowIndex": 0,
+                        "endRowIndex": 1,
+                        "startColumnIndex": 0,
+                        "endColumnIndex": header_len,
+                    }
+                }
+            }
+        },
+        {
+            "repeatCell": {
+                "range": {
+                    "sheetId": worksheet.id,
+                    "startRowIndex": 0,
+                    "endRowIndex": 1,
+                    "startColumnIndex": 0,
+                    "endColumnIndex": header_len,
+                },
+                "cell": {
+                    "userEnteredFormat": {
+                        "backgroundColor": {"red": 0.16, "green": 0.38, "blue": 0.62},
+                        "textFormat": {
+                            "foregroundColor": {"red": 1, "green": 1, "blue": 1},
+                            "bold": True,
+                            "fontSize": 10,
+                        },
+                        "horizontalAlignment": "CENTER",
+                    }
+                },
+                "fields": "userEnteredFormat(backgroundColor,textFormat,horizontalAlignment)",
+            }
+        },
+    ]
+    safe_batch_update(spreadsheet, {"requests": requests})
 
-            results[key].lessons.push({
-              product: productKey,
-              flow: lesson.flow,
-              teacher: lesson.teacher,
-              meeting_date: lesson.meeting_date,
-              month_key: lesson.month_key,
-              status: row.status,
-              duration: row.duration,
-              join: row.join,
-              left: row.left,
-            });
 
-            results[key].months.add(lesson.month_key);
-            results[key].flows.add(lesson.flow);
-            results[key].statuses[row.status] = (results[key].statuses[row.status] || 0) + 1;
-          });
-        });
-      });
+def format_lesson_block(spreadsheet, worksheet, title_row_number: int, student_rows: int, header_len: int):
+    end_student_row = title_row_number + student_rows
+    requests = [
+        {
+            "mergeCells": {
+                "range": {
+                    "sheetId": worksheet.id,
+                    "startRowIndex": title_row_number - 1,
+                    "endRowIndex": title_row_number,
+                    "startColumnIndex": 0,
+                    "endColumnIndex": header_len,
+                },
+                "mergeType": "MERGE_ALL",
+            }
+        },
+        {
+            "repeatCell": {
+                "range": {
+                    "sheetId": worksheet.id,
+                    "startRowIndex": title_row_number - 1,
+                    "endRowIndex": title_row_number,
+                    "startColumnIndex": 0,
+                    "endColumnIndex": header_len,
+                },
+                "cell": {
+                    "userEnteredFormat": {
+                        "backgroundColor": {"red": 0.90, "green": 0.94, "blue": 0.98},
+                        "textFormat": {
+                            "bold": True,
+                            "fontSize": 11,
+                            "foregroundColor": {"red": 0.12, "green": 0.24, "blue": 0.38},
+                        },
+                    }
+                },
+                "fields": "userEnteredFormat(backgroundColor,textFormat)",
+            }
+        },
+        {
+            "addBanding": {
+                "bandedRange": {
+                    "range": {
+                        "sheetId": worksheet.id,
+                        "startRowIndex": title_row_number,
+                        "endRowIndex": end_student_row,
+                        "startColumnIndex": 0,
+                        "endColumnIndex": header_len,
+                    },
+                    "rowProperties": {
+                        "firstBandColor": {"red": 1.0, "green": 1.0, "blue": 1.0},
+                        "secondBandColor": {"red": 0.97, "green": 0.98, "blue": 0.99},
+                    },
+                }
+            }
+        },
+    ]
+    safe_batch_update(spreadsheet, {"requests": requests})
 
-      return Object.values(results)
-        .map((student) => ({
-          ...student,
-          monthCount: student.months.size,
-          flowCount: student.flows.size,
-          lessonCount: student.lessons.length,
-          lessons: student.lessons.sort((a, b) => b.meeting_date.localeCompare(a.meeting_date)),
-        }))
-        .sort((a, b) => b.lessonCount - a.lessonCount);
+
+def open_product_spreadsheets(gc):
+    spreadsheets = {}
+    missing = []
+
+    for product, env_key in PRODUCT_ENV_KEYS.items():
+        spreadsheet_id = (os.getenv(env_key) or "").strip()
+        if not spreadsheet_id:
+            missing.append(env_key)
+            continue
+
+        print(f"Пробую открыть {product}: {spreadsheet_id}")
+        try:
+            spreadsheets[product] = gspread_with_retry(gc.open_by_key, spreadsheet_id, retries=5)
+            print(f"ОК: {product}")
+        except Exception as exc:
+            print(f"Ошибка для {product} ({spreadsheet_id}): {exc}")
+            raise
+
+    if missing:
+        raise ValueError(f"Не заданы переменные окружения: {', '.join(missing)}")
+
+    return spreadsheets
+
+
+def ensure_meta_sheet(spreadsheet, title: str, columns: list[str]):
+    worksheet, created = ensure_worksheet(spreadsheet, title, rows=2000, cols=max(20, len(columns)))
+    ensure_header(worksheet, columns)
+    if created:
+        safe_batch_update(
+            spreadsheet,
+            {
+                "requests": [
+                    {
+                        "updateSheetProperties": {
+                            "properties": {
+                                "sheetId": worksheet.id,
+                                "hidden": True,
+                                "gridProperties": {"frozenRowCount": 1},
+                            },
+                            "fields": "hidden,gridProperties.frozenRowCount",
+                        }
+                    }
+                ]
+            },
+        )
+    return worksheet
+
+
+def get_existing_lesson_ids(index_ws) -> set[str]:
+    values = gspread_with_retry(index_ws.col_values, 1)
+    return {value for value in values[1:] if value}
+
+
+def append_index_row(index_ws, row: list[str]):
+    gspread_with_retry(index_ws.append_row, row, value_input_option="RAW")
+
+
+def append_payroll_row(payroll_ws, row: list[str]):
+    gspread_with_retry(payroll_ws.append_row, row, value_input_option="RAW")
+
+
+def append_archive_row(archive_ws, row: list[str]):
+    gspread_with_retry(archive_ws.append_row, row, value_input_option="RAW")
+
+
+def load_payroll_log(payroll_ws) -> pd.DataFrame:
+    values = gspread_with_retry(payroll_ws.get_all_values)
+    if len(values) <= 1:
+        return pd.DataFrame(columns=PAYROLL_LOG_COLUMNS)
+    return pd.DataFrame(values[1:], columns=values[0])
+
+
+def load_archive_log(archive_ws) -> pd.DataFrame:
+    values = gspread_with_retry(archive_ws.get_all_values)
+    if len(values) <= 1:
+        return pd.DataFrame(columns=LESSON_ARCHIVE_COLUMNS)
+    return pd.DataFrame(values[1:], columns=values[0])
+
+
+def ensure_data_rows(worksheet, required_rows: int, required_cols: int):
+    if worksheet.row_count < required_rows:
+        gspread_with_retry(worksheet.add_rows, required_rows - worksheet.row_count)
+    if worksheet.col_count < required_cols:
+        gspread_with_retry(worksheet.add_cols, required_cols - worksheet.col_count)
+
+
+def write_lesson_sheet(spreadsheet, flow_name: str, meeting_dt: datetime, teacher_name: str, df: pd.DataFrame):
+    sheet_name = build_flow_month_sheet_name(flow_name, meeting_dt)
+    worksheet, _ = ensure_worksheet(spreadsheet, sheet_name, rows=2500, cols=max(20, len(SHEET_COLUMNS)))
+
+    ensure_header(worksheet, SHEET_COLUMNS)
+    apply_sheet_basics(spreadsheet, worksheet, len(SHEET_COLUMNS))
+
+    next_row = len(gspread_with_retry(worksheet.get_all_values)) + 1
+    lesson_title = build_lesson_title(
+        flow_name=flow_name,
+        meeting_dt=meeting_dt,
+        teacher_name=teacher_name,
+        student_count=int((df["Role"] == "Student").sum()),
+    )
+    title_row = [lesson_title] + [""] * (len(SHEET_COLUMNS) - 1)
+    spacer_row = [""] * len(SHEET_COLUMNS)
+    rows_to_append = [spacer_row, title_row] + df[SHEET_COLUMNS].values.tolist()
+
+    required_rows = next_row + len(rows_to_append) + 10
+    ensure_data_rows(worksheet, required_rows, len(SHEET_COLUMNS))
+    gspread_with_retry(worksheet.append_rows, rows_to_append, value_input_option="RAW")
+    format_lesson_block(spreadsheet, worksheet, next_row + 1, len(df), len(SHEET_COLUMNS))
+    return sheet_name
+
+
+def build_lesson_payload(product: str, flow_name: str, meeting_name: str, meeting_dt: datetime, teacher_name: str, df: pd.DataFrame) -> str:
+    students_df = df[df["Role"] == "Student"].copy()
+    rows = []
+    for _, row in df.iterrows():
+        rows.append(
+            {
+                "name": str(row["Name"]),
+                "email": str(row.get("Email", "")),
+                "role": str(row["Role"]),
+                "duration": str(row["Duration"]),
+                "activity_score": str(row["Activity Score"]),
+                "talk_time": str(row["Talk Time"]),
+                "webcam_time": str(row["Webcam Time"]),
+                "messages": str(row["Messages"]),
+                "join": str(row["Join"]),
+                "left": str(row["Left"]),
+                "status": str(row["Status"]),
+            }
+        )
+
+    status_counts = students_df["Status"].value_counts().to_dict() if not students_df.empty else {}
+    payload = {
+        "lesson_id": compute_lesson_id(product, flow_name, meeting_dt),
+        "product": product,
+        "flow": flow_name,
+        "meeting_name": meeting_name,
+        "meeting_date": meeting_dt.strftime("%Y-%m-%d %H:%M:%S"),
+        "month_key": build_month_key(meeting_dt),
+        "teacher": teacher_name,
+        "student_count": int((df["Role"] == "Student").sum()),
+        "moderator_count": int((df["Role"] == "Moderator").sum()),
+        "status_counts": status_counts,
+        "start_hour": meeting_dt.strftime("%H:00"),
+        "rows": rows,
+    }
+    return json.dumps(payload, ensure_ascii=False, separators=(",", ":"))
+
+
+def find_next_page_control(page):
+    selectors = [
+        "a[rel='next']",
+        "button[rel='next']",
+        "a:has-text('Next')",
+        "button:has-text('Next')",
+        "a:has-text('›')",
+        "button:has-text('›')",
+        "a:has-text('>')",
+        "button:has-text('>')",
+        "[aria-label='Next page']",
+        "[aria-label='Next']",
+    ]
+    for selector in selectors:
+        locator = page.locator(selector).first
+        try:
+            if locator.count() and locator.is_visible():
+                disabled_attr = (locator.get_attribute("disabled") or "").lower()
+                aria_disabled = (locator.get_attribute("aria-disabled") or "").lower()
+                class_name = (locator.get_attribute("class") or "").lower()
+                if disabled_attr or aria_disabled == "true" or "disabled" in class_name:
+                    continue
+                return locator
+        except Exception:
+            continue
+    return None
+
+
+def rebuild_payroll_summary(spreadsheet, month_key: str):
+    payroll_log_ws = ensure_meta_sheet(spreadsheet, "_PAYROLL_LOG", PAYROLL_LOG_COLUMNS)
+    df = load_payroll_log(payroll_log_ws)
+    if df.empty:
+        return
+
+    month_df = df[df["Month Key"] == month_key].copy()
+    if month_df.empty:
+        return
+
+    group_counts = (
+        month_df.groupby(["Flow", "Teacher"])
+        .agg(
+            lesson_count=("Lesson ID", "count"),
+            dates=("Meeting Date", lambda s: ", ".join(sorted(set(s)))),
+        )
+        .reset_index()
+    )
+
+    main_teacher_map = {}
+    for flow, flow_df in group_counts.groupby("Flow"):
+        flow_df = flow_df.sort_values(by=["lesson_count", "Teacher"], ascending=[False, True])
+        main_teacher_map[flow] = flow_df.iloc[0]["Teacher"]
+
+    group_rows = []
+    for flow in sorted(month_df["Flow"].unique()):
+        flow_df = month_df[month_df["Flow"] == flow]
+        flow_counts = group_counts[group_counts["Flow"] == flow]
+        main_teacher = main_teacher_map[flow]
+        replacement_rows = flow_counts[flow_counts["Teacher"] != main_teacher]
+        group_rows.append(
+            [
+                flow,
+                str(flow_df.iloc[0]["Product"]),
+                main_teacher,
+                str(int(flow_counts.loc[flow_counts["Teacher"] == main_teacher, "lesson_count"].sum())),
+                ", ".join(replacement_rows["Teacher"].tolist()) or "-",
+                str(int(replacement_rows["lesson_count"].sum()) if not replacement_rows.empty else 0),
+                ", ".join(replacement_rows["dates"].tolist()) if not replacement_rows.empty else "-",
+                str(int(flow_df["Lesson ID"].count())),
+            ]
+        )
+
+    teacher_rows = []
+    teacher_group = (
+        month_df.groupby("Teacher")
+        .agg(
+            total_lessons=("Lesson ID", "count"),
+            groups=("Flow", lambda s: ", ".join(sorted(set(s)))),
+            replacement_dates=("Meeting Date", lambda s: ", ".join(sorted(set(s)))),
+        )
+        .reset_index()
+    )
+    for _, row in teacher_group.iterrows():
+        teacher = str(row["Teacher"])
+        main_lesson_count = sum(
+            1
+            for flow in month_df[month_df["Teacher"] == teacher]["Flow"]
+            if main_teacher_map.get(flow) == teacher
+        )
+        teacher_rows.append(
+            [
+                teacher,
+                str(int(row["total_lessons"])),
+                str(main_lesson_count),
+                str(int(row["total_lessons"]) - int(main_lesson_count)),
+                row["groups"],
+                row["replacement_dates"] if int(row["total_lessons"]) - int(main_lesson_count) else "-",
+            ]
+        )
+
+    summary_ws, _ = ensure_worksheet(spreadsheet, safe_sheet_title(f"Payroll {month_key}"), rows=500, cols=10)
+    gspread_with_retry(summary_ws.clear)
+    values = [
+        [f"Payroll Summary {month_key}"],
+        [],
+        ["By group"],
+        ["Group", "Product", "Main teacher", "Main lessons", "Replacement teacher", "Replacement lessons", "Replacement dates", "Total lessons"],
+        *group_rows,
+        [],
+        ["By teacher"],
+        ["Teacher", "Total lessons", "Main lessons", "Replacement lessons", "Groups", "Replacement dates"],
+        *teacher_rows,
+    ]
+    gspread_with_retry(summary_ws.update, range_name="A1", values=values)
+
+
+def export_dashboard_site(spreadsheets: dict):
+    root_data_dir = os.path.abspath("data")
+    site_data_dir = os.path.abspath(os.path.join("site", "data"))
+
+    os.makedirs(root_data_dir, exist_ok=True)
+    os.makedirs(site_data_dir, exist_ok=True)
+
+    dashboard = {
+        "generated_at": datetime.now(APP_TIMEZONE).strftime("%Y-%m-%d %H:%M:%S"),
+        "timezone": str(APP_TIMEZONE),
+        "products": {},
     }
 
-    function renderStudents() {
-      const results = buildStudentSearchResults();
+    for product, spreadsheet in spreadsheets.items():
+        payroll_ws = ensure_meta_sheet(spreadsheet, "_PAYROLL_LOG", PAYROLL_LOG_COLUMNS)
+        archive_ws = ensure_meta_sheet(spreadsheet, "_LESSON_ARCHIVE", LESSON_ARCHIVE_COLUMNS)
 
-      if (!state.studentQuery || state.studentQuery.trim().length < 2) {
-        nodes.studentsList.innerHTML = '<div class="empty">Type at least 2 characters to search by name, surname or email.</div>';
-        return;
-      }
+        payroll_df = load_payroll_log(payroll_ws)
+        archive_df = load_archive_log(archive_ws)
 
-      nodes.studentsList.innerHTML = results.length ? results.map((student) => `
-        <div class="student-card">
-          <h3>${escapeHtml(student.name)}</h3>
-          <div class="muted">${escapeHtml(student.email || "No email in source data")}</div>
+        lessons = []
+        for _, row in archive_df.iterrows():
+            payload_raw = row.get("Lesson Payload", "")
+            if not payload_raw:
+                continue
+            try:
+                lessons.append(json.loads(payload_raw))
+            except json.JSONDecodeError:
+                continue
 
-          <div class="student-meta">
-            <span class="tag">${student.lessonCount} lessons</span>
-            <span class="tag good">${student.monthCount} months</span>
-            <span class="tag warn">${student.flowCount} flows</span>
-          </div>
+        lessons.sort(key=lambda item: item.get("meeting_date", ""), reverse=True)
 
-          <div class="student-meta" style="margin-top:12px;">
-            ${Object.entries(student.statuses).map(([status, count]) => `<span class="tag">${escapeHtml(status)}: ${count}</span>`).join("")}
-          </div>
+        months = {}
+        parallel_load = {}
+        flows_set = set()
+        teachers_set = set()
 
-          <div class="student-lessons">
-            ${student.lessons.map((lesson) => `
-              <div class="student-lesson-row">
-                <strong>${escapeHtml(lesson.product)} • ${escapeHtml(lesson.flow)}</strong>
-                <div class="muted">${escapeHtml(lesson.meeting_date)} • Teacher: ${escapeHtml(lesson.teacher)}</div>
-                <div class="muted">Status: ${escapeHtml(lesson.status)} • Duration: ${escapeHtml(lesson.duration)} • Join: ${escapeHtml(lesson.join)} • Left: ${escapeHtml(lesson.left)}</div>
-              </div>
-            `).join("")}
-          </div>
-        </div>
-      `).join("") : '<div class="empty">No students found for this query.</div>';
-    }
+        for lesson in lessons:
+            month_key = lesson.get("month_key", "unknown")
+            flow_name = lesson.get("flow", "")
+            teacher_name = lesson.get("teacher", "")
+            start_hour = lesson.get("start_hour", "unknown")
+            student_count = int(lesson.get("student_count", 0))
 
-    function renderView() {
-      nodes.overviewView.style.display = state.view === "overview" ? "" : "none";
-      nodes.lessonsView.style.display = state.view === "lessons" ? "" : "none";
-      nodes.payrollView.style.display = state.view === "payroll" ? "" : "none";
-      nodes.studentsView.style.display = state.view === "students" ? "" : "none";
+            flows_set.add(flow_name)
+            teachers_set.add(teacher_name)
 
-      document.querySelectorAll("[data-view]").forEach((button) => {
-        button.classList.toggle("active", button.dataset.view === state.view);
-      });
-    }
+            bucket = months.setdefault(
+                month_key,
+                {
+                    "month_key": month_key,
+                    "lesson_count": 0,
+                    "flows": set(),
+                    "teachers": set(),
+                    "student_total": 0,
+                },
+            )
+            bucket["lesson_count"] += 1
+            bucket["flows"].add(flow_name)
+            bucket["teachers"].add(teacher_name)
+            bucket["student_total"] += student_count
 
-    function render() {
-      renderProducts();
-      renderMonths();
-      renderFlowFilter();
-      renderHero();
-      renderOverview();
-      renderLessons();
-      renderPayroll();
-      renderStudents();
-      renderView();
-    }
+            load_bucket = parallel_load.setdefault(
+                start_hour,
+                {"hour": start_hour, "groups": 0, "students": 0},
+            )
+            load_bucket["groups"] += 1
+            load_bucket["students"] += student_count
 
-    document.querySelectorAll("[data-view]").forEach((button) => {
-      button.addEventListener("click", () => {
-        state.view = button.dataset.view;
-        renderView();
-      });
-    });
+        month_list = []
+        for month in sorted(months.keys(), reverse=True):
+            bucket = months[month]
+            month_list.append(
+                {
+                    "month_key": month,
+                    "lesson_count": bucket["lesson_count"],
+                    "flow_count": len([x for x in bucket["flows"] if x]),
+                    "teacher_count": len([x for x in bucket["teachers"] if x]),
+                    "student_total": bucket["student_total"],
+                }
+            )
 
-    nodes.flowFilter.addEventListener("change", (event) => {
-      state.flow = event.target.value;
-      render();
-    });
+        parallel_load_list = [parallel_load[key] for key in sorted(parallel_load.keys())]
 
-    nodes.studentSearch.addEventListener("input", (event) => {
-      state.studentQuery = event.target.value;
-      if (state.studentQuery.trim().length >= 2) {
-        state.view = "students";
-      }
-      render();
-    });
+        payroll_by_group = []
+        payroll_by_teacher = []
+        if not payroll_df.empty:
+            for month_key in sorted(payroll_df["Month Key"].unique(), reverse=True):
+                month_df = payroll_df[payroll_df["Month Key"] == month_key].copy()
 
-    fetch("./data/dashboard_data.json")
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status} while loading dashboard_data.json`);
+                group_counts = (
+                    month_df.groupby(["Flow", "Teacher"])
+                    .agg(
+                        lesson_count=("Lesson ID", "count"),
+                        dates=("Meeting Date", lambda s: ", ".join(sorted(set(s)))),
+                    )
+                    .reset_index()
+                )
+
+                main_teacher_map = {}
+                for flow, flow_df in group_counts.groupby("Flow"):
+                    flow_df = flow_df.sort_values(by=["lesson_count", "Teacher"], ascending=[False, True])
+                    main_teacher_map[flow] = flow_df.iloc[0]["Teacher"]
+
+                for flow in sorted(month_df["Flow"].unique()):
+                    flow_df = month_df[month_df["Flow"] == flow]
+                    flow_counts = group_counts[group_counts["Flow"] == flow]
+                    main_teacher = main_teacher_map[flow]
+                    replacement_rows = flow_counts[flow_counts["Teacher"] != main_teacher]
+
+                    payroll_by_group.append(
+                        {
+                            "month_key": month_key,
+                            "group": flow,
+                            "product": product,
+                            "main_teacher": main_teacher,
+                            "main_lessons": int(
+                                flow_counts.loc[flow_counts["Teacher"] == main_teacher, "lesson_count"].sum()
+                            ),
+                            "replacement_teacher": ", ".join(replacement_rows["Teacher"].tolist()) or "-",
+                            "replacement_lessons": int(replacement_rows["lesson_count"].sum())
+                            if not replacement_rows.empty else 0,
+                            "replacement_dates": ", ".join(replacement_rows["dates"].tolist())
+                            if not replacement_rows.empty else "-",
+                            "total_lessons": int(flow_df["Lesson ID"].count()),
+                        }
+                    )
+
+                teacher_group = (
+                    month_df.groupby("Teacher")
+                    .agg(
+                        total_lessons=("Lesson ID", "count"),
+                        groups=("Flow", lambda s: ", ".join(sorted(set(s)))),
+                        replacement_dates=("Meeting Date", lambda s: ", ".join(sorted(set(s)))),
+                    )
+                    .reset_index()
+                )
+                for _, teacher_row in teacher_group.iterrows():
+                    teacher = str(teacher_row["Teacher"])
+                    main_lesson_count = sum(
+                        1
+                        for flow in month_df[month_df["Teacher"] == teacher]["Flow"]
+                        if main_teacher_map.get(flow) == teacher
+                    )
+
+                    payroll_by_teacher.append(
+                        {
+                            "month_key": month_key,
+                            "teacher": teacher,
+                            "total_lessons": int(teacher_row["total_lessons"]),
+                            "main_lessons": int(main_lesson_count),
+                            "replacement_lessons": int(teacher_row["total_lessons"]) - int(main_lesson_count),
+                            "groups": teacher_row["groups"],
+                            "replacement_dates": teacher_row["replacement_dates"],
+                        }
+                    )
+
+        dashboard["products"][product] = {
+            "spreadsheet_title": spreadsheet.title,
+            "lesson_count": len(lessons),
+            "flow_count": len([x for x in flows_set if x]),
+            "teacher_count": len([x for x in teachers_set if x]),
+            "months": month_list,
+            "all_flows": sorted([x for x in flows_set if x]),
+            "parallel_load": parallel_load_list,
+            "lessons": lessons,
+            "payroll_by_group": payroll_by_group,
+            "payroll_by_teacher": payroll_by_teacher,
         }
-        return response.json();
-      })
-      .then((data) => {
-        state.data = data;
-        const products = Object.keys(data.products || {});
-        if (!products.length) {
-          throw new Error("dashboard_data.json загружен, но products пустой");
-        }
-        state.product = products[0];
-        state.month = data.products[state.product]?.months?.[0]?.month_key || "";
-        nodes.generatedAt.textContent = `Updated: ${data.generated_at} (${data.timezone})`;
-        render();
-      })
-      .catch((error) => {
-        nodes.generatedAt.textContent = "Не удалось загрузить dashboard_data.json";
-        nodes.heroTitle.textContent = "Loading failed";
-        nodes.heroDescription.textContent = error.message;
-        nodes.overviewView.innerHTML = `<div class="empty">${escapeHtml(error.message)}</div>`;
-      });
-  </script>
-</body>
-</html>
+
+    for output_path in [
+        os.path.join(root_data_dir, "dashboard_data.json"),
+        os.path.join(site_data_dir, "dashboard_data.json"),
+    ]:
+        with open(output_path, "w", encoding="utf-8") as handle:
+            json.dump(dashboard, handle, ensure_ascii=False, indent=2)
+
+    print("Dashboard JSON обновлён")
+
+
+def run_bot(config: dict) -> list[dict]:
+    password = os.getenv("BBB_PASSWORD")
+    if not password:
+        raise ValueError("BBB_PASSWORD не задан!")
+
+    download_dir = os.path.abspath("downloads")
+    os.makedirs(download_dir, exist_ok=True)
+
+    with sync_playwright() as p:
+        browser = p.chromium.launch(
+            headless=True,
+            args=["--no-sandbox", "--disable-blink-features=AutomationControlled"],
+        )
+        context = browser.new_context(
+            accept_downloads=True,
+            user_agent=(
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                "AppleWebKit/537.36 (KHTML, like Gecko) "
+                "Chrome/122.0.0.0 Safari/537.36"
+            ),
+            viewport={"width": 1280, "height": 800},
+        )
+        page = context.new_page()
+
+        print("BOT: Открываю страницу логина...")
+        page.goto("https://biggerbluebutton.com/login", wait_until="domcontentloaded", timeout=30000)
+        page.wait_for_timeout(3000)
+
+        btn = page.query_selector("button:has-text('Sign In')")
+        if btn:
+            btn.click()
+            page.wait_for_timeout(1500)
+
+        inputs = page.query_selector_all("input")
+        visible_text, visible_pass = None, None
+        for inp in inputs:
+            input_type = inp.get_attribute("type") or "text"
+            if inp.is_visible() and input_type in ("text", "email") and visible_text is None:
+                visible_text = inp
+            if inp.is_visible() and input_type == "password" and visible_pass is None:
+                visible_pass = inp
+
+        if not visible_text or not visible_pass:
+            page.screenshot(path="debug_login.png", full_page=True)
+            raise RuntimeError("Поля логина не найдены.")
+
+        visible_text.click()
+        page.keyboard.type("260401190051930", delay=50)
+        visible_pass.click()
+        page.keyboard.type(password, delay=50)
+        page.wait_for_timeout(500)
+
+        print("BOT: Нажимаю SIGN IN...")
+        try:
+            with page.expect_navigation(timeout=15000):
+                page.click('button:has-text("SIGN IN")')
+        except Exception:
+            page.wait_for_timeout(5000)
+
+        page.screenshot(path="debug_login.png", full_page=True)
+        if "login" in page.url:
+            raise RuntimeError("Авторизация не прошла. Смотри debug_login.png")
+
+        print("BOT: Авторизован!")
+
+        page.goto("https://biggerbluebutton.com/rooms/meetings", wait_until="networkidle", timeout=30000)
+        page.wait_for_timeout(3000)
+        page.screenshot(path="debug_meetings.png", full_page=True)
+
+        saved_files = []
+        skipped_by_date = 0
+        page_number = 1
+
+        while True:
+            rows = page.query_selector_all("tr")
+            print(f"BOT: Страница {page_number}, строк в таблице: {len(rows)}")
+
+            reached_older_than_range = False
+            downloads_on_page = 0
+
+            for i, row in enumerate(rows):
+                report_link = row.query_selector("a:has-text('Report.CSV'), a:has-text('Report.csv')")
+                if not report_link:
+                    continue
+
+                cells = row.query_selector_all("td")
+                meeting_name = f"Meeting_{page_number}_{i}"
+                if cells:
+                    name_link = cells[0].query_selector("a")
+                    meeting_name = name_link.inner_text().strip() if name_link else cells[0].inner_text().strip()
+                    if not meeting_name:
+                        meeting_name = f"Meeting_{page_number}_{i}"
+
+                meeting_date = cells[1].inner_text().strip() if len(cells) > 1 else ""
+                try:
+                    meeting_dt = parse_meeting_datetime(meeting_date)
+                except ValueError:
+                    print(f"BOT: Пропускаю '{meeting_name}' — не удалось разобрать дату.")
+                    continue
+
+                if config["start_date"] and meeting_dt.date() < config["start_date"]:
+                    reached_older_than_range = True
+                    skipped_by_date += 1
+                    continue
+
+                if not is_in_range(meeting_dt, config):
+                    skipped_by_date += 1
+                    continue
+
+                print(f"BOT: Скачиваю '{meeting_name}' ({meeting_date})...")
+                try:
+                    with page.expect_download(timeout=30000) as dl_info:
+                        report_link.click()
+
+                    download = dl_info.value
+                    safe_name = re.sub(r'[\\/*?:"<>|]', "_", meeting_name)
+                    filename = f"{safe_name}_{page_number}_{i}.csv"
+                    save_path = os.path.join(download_dir, filename)
+                    download.save_as(save_path)
+                    saved_files.append(
+                        {
+                            "meeting_name": meeting_name,
+                            "meeting_date": meeting_date,
+                            "meeting_dt": meeting_dt,
+                            "file_path": save_path,
+                        }
+                    )
+                    downloads_on_page += 1
+                    page.wait_for_timeout(500)
+                except Exception as exc:
+                    print(f"BOT: Ошибка при скачивании '{meeting_name}': {exc}")
+
+            if reached_older_than_range:
+                print("BOT: Дошёл до уроков старше нижней границы периода, останавливаюсь.")
+                break
+
+            next_control = find_next_page_control(page)
+            if not next_control:
+                print("BOT: Следующая страница не найдена, пагинация завершена.")
+                break
+
+            before_marker = rows[-1].inner_text().strip() if rows else ""
+            print(f"BOT: Перехожу на страницу {page_number + 1}...")
+            try:
+                next_control.click()
+                page.wait_for_load_state("networkidle", timeout=30000)
+                page.wait_for_timeout(2000)
+            except Exception as exc:
+                print(f"BOT: Не удалось открыть следующую страницу: {exc}")
+                break
+
+            new_rows = page.query_selector_all("tr")
+            after_marker = new_rows[-1].inner_text().strip() if new_rows else ""
+            if before_marker and before_marker == after_marker and downloads_on_page == 0:
+                print("BOT: Похоже, страница не сменилась, прекращаю пагинацию.")
+                break
+
+            page_number += 1
+
+        browser.close()
+        print(f"BOT: Пропущено по диапазону дат: {skipped_by_date}")
+        print(f"BOT: Всего скачано: {len(saved_files)} файлов")
+        return saved_files
+
+
+def process_lessons(files: list[dict], spreadsheets: dict):
+    impacted_months_by_product = {product: set() for product in spreadsheets}
+
+    for product, spreadsheet in spreadsheets.items():
+        ensure_meta_sheet(spreadsheet, "_LESSON_INDEX", LESSON_INDEX_COLUMNS)
+        ensure_meta_sheet(spreadsheet, "_PAYROLL_LOG", PAYROLL_LOG_COLUMNS)
+        ensure_meta_sheet(spreadsheet, "_LESSON_ARCHIVE", LESSON_ARCHIVE_COLUMNS)
+
+    existing_ids_by_product = {
+        product: get_existing_lesson_ids(ensure_meta_sheet(spreadsheet, "_LESSON_INDEX", LESSON_INDEX_COLUMNS))
+        for product, spreadsheet in spreadsheets.items()
+    }
+    existing_archive_ids_by_product = {
+        product: get_existing_lesson_ids(ensure_meta_sheet(spreadsheet, "_LESSON_ARCHIVE", LESSON_ARCHIVE_COLUMNS))
+        for product, spreadsheet in spreadsheets.items()
+    }
+
+    for item in files:
+        meeting_name = item["meeting_name"]
+        meeting_dt = item["meeting_dt"]
+        file_path = item["file_path"]
+
+        product = detect_product(meeting_name)
+        if not product:
+            print(f"  Пропускаю '{meeting_name}' — продукт не распознан.")
+            continue
+
+        flow_name = normalize_flow_name(meeting_name)
+        lesson_id = compute_lesson_id(product, flow_name, meeting_dt)
+
+        try:
+            df = prepare_dataframe(file_path)
+        except Exception as exc:
+            print(f"  ОШИБКА чтения '{meeting_name}': {exc}")
+            continue
+
+        if df.empty:
+            print(f"  Пропускаю '{meeting_name}' — нет данных.")
+            continue
+
+        teacher_name = pick_teacher_name(df)
+        spreadsheet = spreadsheets[product]
+        month_key = build_month_key(meeting_dt)
+        student_count = int((df["Role"] == "Student").sum())
+        lesson_already_exists = lesson_id in existing_ids_by_product[product]
+        archive_exists = lesson_id in existing_archive_ids_by_product[product]
+
+        if lesson_already_exists and archive_exists:
+            print(f"  Пропускаю '{meeting_name}' — уже загружен ({lesson_id}).")
+            continue
+
+        if lesson_already_exists:
+            print(f"  [{product}] Урок '{flow_name}' уже в таблице, дозаполняю архив сайта.")
+        else:
+            sheet_name = write_lesson_sheet(spreadsheet, flow_name, meeting_dt, teacher_name, df)
+            inserted_at = datetime.now(APP_TIMEZONE).strftime("%Y-%m-%d %H:%M:%S")
+
+            lesson_index_ws = ensure_meta_sheet(spreadsheet, "_LESSON_INDEX", LESSON_INDEX_COLUMNS)
+            append_index_row(
+                lesson_index_ws,
+                [
+                    lesson_id,
+                    product,
+                    flow_name,
+                    month_key,
+                    meeting_name,
+                    meeting_dt.strftime("%Y-%m-%d %H:%M:%S"),
+                    teacher_name,
+                    sheet_name,
+                    str(student_count),
+                    inserted_at,
+                ],
+            )
+
+            payroll_log_ws = ensure_meta_sheet(spreadsheet, "_PAYROLL_LOG", PAYROLL_LOG_COLUMNS)
+            append_payroll_row(
+                payroll_log_ws,
+                [
+                    lesson_id,
+                    month_key,
+                    product,
+                    flow_name,
+                    meeting_name,
+                    meeting_dt.strftime("%Y-%m-%d"),
+                    teacher_name,
+                    str(student_count),
+                ],
+            )
+
+        archive_ws = ensure_meta_sheet(spreadsheet, "_LESSON_ARCHIVE", LESSON_ARCHIVE_COLUMNS)
+        if not archive_exists:
+            append_archive_row(
+                archive_ws,
+                [
+                    lesson_id,
+                    month_key,
+                    product,
+                    flow_name,
+                    meeting_name,
+                    meeting_dt.strftime("%Y-%m-%d %H:%M:%S"),
+                    teacher_name,
+                    str(student_count),
+                    build_lesson_payload(product, flow_name, meeting_name, meeting_dt, teacher_name, df),
+                ],
+            )
+            existing_archive_ids_by_product[product].add(lesson_id)
+
+        if not lesson_already_exists:
+            existing_ids_by_product[product].add(lesson_id)
+
+        impacted_months_by_product[product].add(month_key)
+        print(f"  [{product}] Добавлен урок '{flow_name}' за {month_key}, teacher={teacher_name}")
+        time.sleep(2)
+
+    for product, month_keys in impacted_months_by_product.items():
+        if not month_keys:
+            continue
+        spreadsheet = spreadsheets[product]
+        for month_key in sorted(month_keys):
+            print(f"  [{product}] Пересчитываю payroll summary для {month_key}")
+            rebuild_payroll_summary(spreadsheet, month_key)
+
+    export_dashboard_site(spreadsheets)
+
+
+if __name__ == "__main__":
+    print("=== СТАРТ ===")
+
+    try:
+        config = load_runtime_config()
+        print("Режим:", config["mode"], "| диапазон:", config["start_date"], "—", config["end_date"])
+    except Exception as exc:
+        print(f"ОШИБКА конфигурации: {exc}")
+        raise SystemExit(1)
+
+    try:
+        service_account_info = json.loads(os.getenv("GOOGLE_JSON"))
+        gc = gspread.service_account_from_dict(service_account_info)
+        print("Google авторизация: ОК")
+    except Exception as exc:
+        print(f"ОШИБКА Google авторизации: {exc}")
+        raise SystemExit(1)
+
+    try:
+        spreadsheets = open_product_spreadsheets(gc)
+        for product, spreadsheet in spreadsheets.items():
+            print(f"Таблица для {product}: '{spreadsheet.title}'")
+    except Exception as exc:
+        print(f"ОШИБКА открытия таблиц: {exc}")
+        raise SystemExit(1)
+
+    try:
+        files = run_bot(config)
+    except Exception as exc:
+        print(f"ОШИБКА бота: {exc}")
+        raise SystemExit(1)
+
+    try:
+        process_lessons(files, spreadsheets)
+    except Exception as exc:
+        print(f"ОШИБКА обработки уроков: {exc}")
+        raise SystemExit(1)
+
+    print("=== ГОТОВО ===")
