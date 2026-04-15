@@ -60,7 +60,7 @@ jobs:
           fi
 
       - name: Run bot
-        run: python "Daily Report Main.py"
+        run: python "main.py"
         env:
           GOOGLE_JSON: ${{ secrets.GOOGLE_JSON }}
           BBB_PASSWORD: ${{ secrets.BBB_PASSWORD }}
