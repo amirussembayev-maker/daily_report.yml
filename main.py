@@ -718,9 +718,11 @@ def rebuild_payroll_summary(spreadsheet, month_key: str):
 
 
 def export_dashboard_site(spreadsheets: dict):
-    site_dir = os.path.abspath("site")
-    data_dir = os.path.join(site_dir, "data")
-    os.makedirs(data_dir, exist_ok=True)
+    root_data_dir = os.path.abspath("data")
+    site_data_dir = os.path.abspath(os.path.join("site", "data"))
+
+    os.makedirs(root_data_dir, exist_ok=True)
+    os.makedirs(site_data_dir, exist_ok=True)
 
     dashboard = {
         "generated_at": datetime.now(APP_TIMEZONE).strftime("%Y-%m-%d %H:%M:%S"),
@@ -752,7 +754,13 @@ def export_dashboard_site(spreadsheets: dict):
             month_key = lesson.get("month_key", "unknown")
             bucket = months.setdefault(
                 month_key,
-                {"month_key": month_key, "lesson_count": 0, "flows": set(), "teachers": set(), "student_count": 0},
+                {
+                    "month_key": month_key,
+                    "lesson_count": 0,
+                    "flows": set(),
+                    "teachers": set(),
+                    "student_count": 0,
+                },
             )
             bucket["lesson_count"] += 1
             bucket["flows"].add(lesson.get("flow", ""))
@@ -774,9 +782,11 @@ def export_dashboard_site(spreadsheets: dict):
 
         payroll_by_group = []
         payroll_by_teacher = []
+
         if not payroll_df.empty:
             for month_key in sorted(payroll_df["Month Key"].unique(), reverse=True):
                 month_df = payroll_df[payroll_df["Month Key"] == month_key].copy()
+
                 group_counts = (
                     month_df.groupby(["Flow", "Teacher"])
                     .agg(
@@ -785,6 +795,7 @@ def export_dashboard_site(spreadsheets: dict):
                     )
                     .reset_index()
                 )
+
                 main_teacher_map = {}
                 for flow, flow_df in group_counts.groupby("Flow"):
                     flow_df = flow_df.sort_values(by=["lesson_count", "Teacher"], ascending=[False, True])
@@ -795,16 +806,25 @@ def export_dashboard_site(spreadsheets: dict):
                     flow_counts = group_counts[group_counts["Flow"] == flow]
                     main_teacher = main_teacher_map[flow]
                     replacement_rows = flow_counts[flow_counts["Teacher"] != main_teacher]
+
                     payroll_by_group.append(
                         {
                             "month_key": month_key,
                             "group": flow,
                             "product": product,
                             "main_teacher": main_teacher,
-                            "main_lessons": int(flow_counts.loc[flow_counts["Teacher"] == main_teacher, "lesson_count"].sum()),
+                            "main_lessons": int(
+                                flow_counts.loc[
+                                    flow_counts["Teacher"] == main_teacher, "lesson_count"
+                                ].sum()
+                            ),
                             "replacement_teacher": ", ".join(replacement_rows["Teacher"].tolist()) or "-",
-                            "replacement_lessons": int(replacement_rows["lesson_count"].sum()) if not replacement_rows.empty else 0,
-                            "replacement_dates": ", ".join(replacement_rows["dates"].tolist()) if not replacement_rows.empty else "-",
+                            "replacement_lessons": int(replacement_rows["lesson_count"].sum())
+                            if not replacement_rows.empty
+                            else 0,
+                            "replacement_dates": ", ".join(replacement_rows["dates"].tolist())
+                            if not replacement_rows.empty
+                            else "-",
                             "total_lessons": int(flow_df["Lesson ID"].count()),
                         }
                     )
@@ -818,6 +838,7 @@ def export_dashboard_site(spreadsheets: dict):
                     )
                     .reset_index()
                 )
+
                 for _, teacher_row in teacher_group.iterrows():
                     teacher = str(teacher_row["Teacher"])
                     main_lesson_count = sum(
@@ -825,6 +846,7 @@ def export_dashboard_site(spreadsheets: dict):
                         for flow in month_df[month_df["Teacher"] == teacher]["Flow"]
                         if main_teacher_map.get(flow) == teacher
                     )
+
                     payroll_by_teacher.append(
                         {
                             "month_key": month_key,
@@ -848,8 +870,14 @@ def export_dashboard_site(spreadsheets: dict):
             "payroll_by_teacher": payroll_by_teacher,
         }
 
-    with open(os.path.join(data_dir, "dashboard_data.json"), "w", encoding="utf-8") as handle:
-        json.dump(dashboard, handle, ensure_ascii=False, indent=2)
+    for output_path in [
+        os.path.join(root_data_dir, "dashboard_data.json"),
+        os.path.join(site_data_dir, "dashboard_data.json"),
+    ]:
+        with open(output_path, "w", encoding="utf-8") as handle:
+            json.dump(dashboard, handle, ensure_ascii=False, indent=2)
+
+    print("Dashboard JSON обновлён:", os.path.join(root_data_dir, "dashboard_data.json"))
 
 
 def run_bot(config: dict) -> list[dict]:
