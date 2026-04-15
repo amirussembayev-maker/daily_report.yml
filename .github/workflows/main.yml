@@ -1,5 +1,10 @@
 name: Daily BBB Report
 
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
 on:
   schedule:
     - cron: '0 */2 * * *'
@@ -21,11 +26,18 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
@@ -48,7 +60,7 @@ jobs:
           fi
 
       - name: Run bot
-        run: python "main.py"
+        run: python "Daily Report Main.py"
         env:
           GOOGLE_JSON: ${{ secrets.GOOGLE_JSON }}
           BBB_PASSWORD: ${{ secrets.BBB_PASSWORD }}
@@ -61,6 +73,15 @@ jobs:
           SYNC_MODE: ${{ env.SYNC_MODE }}
           REPORT_START_DATE: ${{ env.REPORT_START_DATE }}
           REPORT_END_DATE: ${{ env.REPORT_END_DATE }}
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
 
       - name: Upload debug artifacts
         if: always()
