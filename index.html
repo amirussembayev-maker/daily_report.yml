@@ -3,260 +3,421 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Attendance Dashboard</title>
+  <title>WeGlobal Attendance Reports</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #f4efe8;
-      --panel: #fffdf8;
-      --line: #d8ccb7;
-      --text: #1f2933;
-      --muted: #6b7280;
-      --accent: #0f5c5a;
-      --accent-2: #d17b49;
-      --good: #2f7d4d;
-      --warn: #b86c2f;
-      --bad: #b84d38;
-      --shadow: 0 14px 28px rgba(61, 48, 28, 0.08);
+      --bg: #f5f5f7;
+      --panel: rgba(255, 255, 255, 0.86);
+      --panel-strong: #ffffff;
+      --text: #1d1d1f;
+      --muted: #6e6e73;
+      --line: rgba(0, 0, 0, 0.08);
+      --accent: #0071e3;
+      --accent-soft: rgba(0, 113, 227, 0.10);
+      --shadow: 0 16px 40px rgba(0, 0, 0, 0.07);
+      --radius: 28px;
+      --good: #14804a;
+      --warn: #b06a15;
+      --bad: #c0392b;
     }
 
     * {
       box-sizing: border-box;
     }
 
+    html {
+      scroll-behavior: smooth;
+    }
+
     body {
       margin: 0;
-      font-family: "Avenir Next", "Segoe UI", sans-serif;
-      background:
-        radial-gradient(circle at top left, rgba(240, 195, 122, 0.24), transparent 25%),
-        radial-gradient(circle at top right, rgba(15, 92, 90, 0.12), transparent 22%),
-        linear-gradient(180deg, #f8f5ef 0%, var(--bg) 100%);
+      font-family: "Inter", sans-serif;
       color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(0, 113, 227, 0.10), transparent 22%),
+        linear-gradient(180deg, #fbfbfd 0%, var(--bg) 100%);
     }
 
-    .app {
-      display: grid;
-      grid-template-columns: 300px minmax(0, 1fr);
-      min-height: 100vh;
-    }
-
-    .sidebar {
-      padding: 24px;
-      background: rgba(255, 253, 248, 0.9);
-      border-right: 1px solid var(--line);
+    .topbar {
       position: sticky;
       top: 0;
-      height: 100vh;
-      overflow: auto;
+      z-index: 20;
+      backdrop-filter: blur(20px);
+      background: rgba(251, 251, 253, 0.78);
+      border-bottom: 1px solid var(--line);
     }
 
-    .content {
-      padding: 28px;
-      min-width: 0;
+    .topbar-inner,
+    .hero,
+    .page {
+      width: min(1280px, calc(100% - 32px));
+      margin: 0 auto;
     }
 
-    h1, h2, h3, h4 {
-      margin: 0;
-      font-family: Georgia, "Times New Roman", serif;
-    }
-
-    .muted {
-      color: var(--muted);
+    .topbar-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 14px 0;
     }
 
     .brand {
-      margin-bottom: 24px;
+      font-weight: 700;
+      font-size: 20px;
+      letter-spacing: -0.02em;
     }
 
-    .brand small {
+    .brand span {
       color: var(--muted);
-      display: block;
-      margin-bottom: 6px;
+      font-weight: 500;
     }
 
-    .group {
-      margin-bottom: 22px;
-    }
-
-    .group-title {
-      font-size: 12px;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
+    .top-meta {
+      display: flex;
+      gap: 20px;
+      align-items: center;
       color: var(--muted);
-      margin-bottom: 10px;
+      font-size: 13px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
     }
 
-    .stack {
-      display: grid;
-      gap: 10px;
+    .hero {
+      padding: 56px 0 28px;
+      text-align: center;
     }
 
-    .card,
-    .button,
-    .stat,
-    .lesson,
-    .table-card,
-    .chart-card,
-    .student-card,
-    .flow-item {
-      border: 1px solid var(--line);
-      background: var(--panel);
-      border-radius: 18px;
-      box-shadow: var(--shadow);
+    .eyebrow {
+      color: var(--accent);
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 12px;
     }
 
-    .button {
-      padding: 12px 14px;
+    h1 {
+      margin: 0;
+      font-size: clamp(42px, 6vw, 72px);
+      line-height: 0.98;
+      letter-spacing: -0.05em;
+      font-weight: 800;
+    }
+
+    .hero-copy {
+      margin: 18px auto 0;
+      max-width: 840px;
+      font-size: clamp(20px, 2.4vw, 30px);
+      line-height: 1.2;
+      letter-spacing: -0.03em;
+      color: var(--muted);
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 24px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 150px;
+      padding: 12px 20px;
+      border-radius: 999px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
       cursor: pointer;
-      transition: transform 0.15s ease, border-color 0.15s ease;
+      border: none;
+      font-family: inherit;
     }
 
-    .button.active,
-    .button:hover {
-      border-color: var(--accent-2);
+    .btn.primary {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 10px 24px rgba(0, 113, 227, 0.24);
+    }
+
+    .btn.secondary {
+      color: var(--accent);
+      border: 1px solid rgba(0, 113, 227, 0.30);
+      background: rgba(255,255,255,0.80);
+    }
+
+    .btn.active {
+      background: #111;
+      color: #fff;
+      border-color: #111;
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.14);
+    }
+
+    .btn:hover {
       transform: translateY(-1px);
     }
 
-    .button strong {
+    .page {
+      padding-bottom: 42px;
+    }
+
+    .hero-panel,
+    .panel,
+    .stat-card,
+    .filter-card,
+    .lesson,
+    .student-card,
+    .flow-card,
+    .chart-card,
+    .month-card,
+    .kpi-card {
+      background: var(--panel);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.88);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .hero-panel {
+      margin-top: 34px;
+      padding: 28px;
+      display: grid;
+      gap: 18px;
+    }
+
+    .identity-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 18px;
+      text-align: left;
+    }
+
+    .identity-card {
+      padding: 18px 18px 20px;
+      border-radius: 22px;
+      background: rgba(255,255,255,0.86);
+      border: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .hero-chip-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .hero-chip {
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: #f0f6ff;
+      color: var(--accent);
+      font-weight: 700;
+      font-size: 13px;
+    }
+
+    .label {
       display: block;
-      margin-bottom: 4px;
-      word-break: break-word;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+      margin-bottom: 10px;
+      font-weight: 600;
+    }
+
+    .value {
+      font-size: 24px;
+      line-height: 1.18;
+      letter-spacing: -0.03em;
+      font-weight: 700;
     }
 
     .toolbar {
       display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-bottom: 18px;
-    }
-
-    .chip {
-      padding: 10px 14px;
-      border-radius: 999px;
-      border: 1px solid var(--line);
-      background: rgba(255, 255, 255, 0.72);
-      cursor: pointer;
-      font-weight: 600;
-    }
-
-    .chip.active {
-      background: var(--accent);
-      color: #fff;
-      border-color: var(--accent);
-    }
-
-    .filters {
-      display: grid;
-      grid-template-columns: minmax(180px, 260px) minmax(220px, 1fr);
       gap: 12px;
-      margin-bottom: 18px;
-    }
-
-    .filters select,
-    .filters input {
-      width: 100%;
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      background: rgba(255, 255, 255, 0.88);
-      padding: 12px 14px;
-      font-size: 14px;
-      color: var(--text);
-    }
-
-    .hero {
-      display: grid;
-      gap: 18px;
-      grid-template-columns: 1.45fr 1fr;
+      flex-wrap: wrap;
+      justify-content: center;
       margin-bottom: 20px;
     }
 
-    .card {
-      padding: 20px;
-    }
-
-    .stats {
+    .filter-grid {
       display: grid;
-      grid-template-columns: repeat(4, minmax(120px, 1fr));
-      gap: 14px;
+      grid-template-columns: minmax(220px, 280px) 1fr;
+      gap: 18px;
+      margin-bottom: 22px;
     }
 
-    .stat {
+    .filter-card {
       padding: 18px;
-      min-width: 0;
     }
 
-    .stat b {
-      display: block;
-      font-size: 28px;
-      margin-top: 10px;
-      line-height: 1.1;
+    .filter-card select,
+    .filter-card input {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(255,255,255,0.92);
+      padding: 14px 16px;
+      font-size: 14px;
+      color: var(--text);
+      font-family: inherit;
+      outline: none;
     }
 
-    .month-strip {
-      display: flex;
-      gap: 10px;
-      overflow: auto;
-      padding-bottom: 4px;
+    .stat-strip {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 18px;
       margin-bottom: 18px;
     }
 
-    .month-pill {
-      min-width: 220px;
-      padding: 14px 16px;
-      border-radius: 18px;
-      color: white;
-      background: linear-gradient(135deg, #174e5f, #0f5c5a);
-      flex: 0 0 auto;
+    .stat-card {
+      padding: 22px 18px;
+      text-align: center;
     }
 
-    .overview-grid {
+    .stat-card .value {
+      font-size: clamp(30px, 4vw, 44px);
+      margin-top: 6px;
+    }
+
+    .premium-kpis {
       display: grid;
-      grid-template-columns: 1.2fr 0.8fr;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 18px;
+      margin-bottom: 22px;
+    }
+
+    .kpi-card {
+      padding: 22px 20px;
+      text-align: left;
+    }
+
+    .kpi-card .kpi-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .kpi-card .kpi-value {
+      font-size: clamp(30px, 4vw, 42px);
+      letter-spacing: -0.04em;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .kpi-card .kpi-sub {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .content-grid {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
       gap: 18px;
     }
 
-    .flow-list {
-      display: grid;
-      gap: 10px;
-    }
-
-    .flow-item {
-      padding: 14px;
-      background: rgba(255, 255, 255, 0.82);
-    }
-
+    .panel,
     .chart-card {
+      padding: 24px;
+    }
+
+    .panel-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .panel h2,
+    .chart-card h2 {
+      margin: 0;
+      font-size: clamp(26px, 2.4vw, 38px);
+      letter-spacing: -0.04em;
+      font-weight: 700;
+    }
+
+    .panel-subtle {
+      color: var(--muted);
+      font-size: 14px;
+      margin-top: 6px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 68px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-weight: 700;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .months-row,
+    .flow-list,
+    .students-view,
+    .lessons {
+      display: grid;
+      gap: 14px;
+    }
+
+    .month-card,
+    .flow-card,
+    .student-card {
       padding: 18px;
+    }
+
+    .month-card strong,
+    .flow-card strong,
+    .student-card strong {
+      display: block;
+      font-size: 20px;
+      line-height: 1.08;
+      letter-spacing: -0.03em;
+    }
+
+    .flow-card .muted,
+    .month-card .muted,
+    .student-card .muted {
+      margin-top: 6px;
     }
 
     .chart {
       display: grid;
-      gap: 12px;
+      gap: 14px;
       margin-top: 12px;
     }
 
     .chart-row {
       display: grid;
-      grid-template-columns: 72px 1fr auto;
-      gap: 10px;
+      grid-template-columns: 80px 1fr auto;
+      gap: 12px;
       align-items: center;
     }
 
     .bar-wrap {
       height: 14px;
       border-radius: 999px;
-      background: #efe8d7;
+      background: #eef2f7;
       overflow: hidden;
     }
 
     .bar {
       height: 100%;
-      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      background: linear-gradient(90deg, #0071e3 0%, #42a5ff 100%);
       border-radius: 999px;
-    }
-
-    .lessons {
-      display: grid;
-      gap: 14px;
     }
 
     .lesson {
@@ -266,8 +427,8 @@
     .lesson summary {
       list-style: none;
       cursor: pointer;
-      padding: 18px;
-      background: linear-gradient(90deg, rgba(240, 195, 122, 0.22), rgba(255, 255, 255, 0));
+      padding: 20px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.94), rgba(245,247,250,0.78));
     }
 
     .lesson summary::-webkit-details-marker {
@@ -284,49 +445,51 @@
 
     .lesson-head > div:first-child {
       min-width: 260px;
-      flex: 1 1 380px;
+      flex: 1 1 420px;
     }
 
     .lesson-head h3 {
+      margin: 0;
+      font-size: 28px;
+      line-height: 1.04;
+      letter-spacing: -0.04em;
       word-break: break-word;
-      line-height: 1.2;
     }
 
-    .lesson-tags {
+    .lesson-tags,
+    .student-meta {
       display: flex;
       flex-wrap: wrap;
       gap: 8px;
-      justify-content: flex-end;
-      flex: 1 1 260px;
     }
 
     .tag {
-      padding: 5px 10px;
+      padding: 6px 10px;
       border-radius: 999px;
       font-size: 12px;
       font-weight: 700;
-      background: #efe8d7;
-      color: #5c4732;
+      background: #f0f6ff;
+      color: var(--accent);
       white-space: nowrap;
     }
 
     .tag.good {
-      background: #dfefe4;
+      background: rgba(20, 128, 74, 0.12);
       color: var(--good);
     }
 
     .tag.warn {
-      background: #f7e6d8;
+      background: rgba(176, 106, 21, 0.12);
       color: var(--warn);
     }
 
     .tag.bad {
-      background: #f7dddd;
+      background: rgba(192, 57, 43, 0.12);
       color: var(--bad);
     }
 
     .lesson-body {
-      padding: 0 18px 18px;
+      padding: 0 20px 20px;
       display: grid;
       gap: 18px;
     }
@@ -335,28 +498,29 @@
       display: grid;
       grid-template-columns: repeat(5, minmax(150px, 1fr));
       gap: 16px;
-      padding-top: 4px;
+      padding-top: 6px;
     }
 
     .summary-box {
-      padding: 18px 16px;
-      border-radius: 14px;
-      background: #f8f4eb;
+      padding: 20px 18px;
+      border-radius: 22px;
+      background: var(--panel-strong);
       border: 1px solid var(--line);
-      min-width: 0;
     }
 
     .summary-box b {
       display: block;
       margin-top: 8px;
-      font-size: 24px;
-      line-height: 1.1;
+      font-size: 28px;
+      line-height: 1.05;
+      letter-spacing: -0.03em;
     }
 
-    .table-card {
+    .table-wrap {
       overflow: auto;
-      max-height: 420px;
-      min-width: 0;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: var(--panel-strong);
     }
 
     table {
@@ -367,49 +531,33 @@
 
     th,
     td {
-      padding: 10px;
-      border-top: 1px solid #eee6d7;
+      padding: 14px 16px;
       text-align: left;
+      border-top: 1px solid var(--line);
+      font-size: 14px;
       white-space: nowrap;
     }
 
     th {
+      border-top: 0;
+      background: #fafafc;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      font-size: 12px;
+      font-weight: 600;
       position: sticky;
       top: 0;
-      background: #214f65;
-      color: white;
       z-index: 1;
-      font-size: 13px;
-      letter-spacing: 0.02em;
-    }
-
-    tr:nth-child(even) td {
-      background: #fcfaf5;
     }
 
     tr.teacher td {
-      background: #eef8f5;
+      background: rgba(0, 113, 227, 0.05);
       font-weight: 700;
     }
 
-    .students-view {
-      display: grid;
-      gap: 14px;
-    }
-
-    .student-card {
-      padding: 18px;
-    }
-
-    .student-card h3 {
-      margin-bottom: 6px;
-    }
-
-    .student-meta {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 10px;
+    tr:nth-child(even) td {
+      background: rgba(250, 250, 252, 0.6);
     }
 
     .student-lessons {
@@ -420,160 +568,211 @@
 
     .student-lesson-row {
       border: 1px solid var(--line);
-      border-radius: 14px;
-      padding: 10px 12px;
-      background: rgba(255, 255, 255, 0.78);
+      border-radius: 20px;
+      padding: 12px 14px;
+      background: rgba(255,255,255,0.84);
     }
 
     .empty {
-      padding: 20px;
+      padding: 22px;
       border: 1px dashed var(--line);
-      border-radius: 18px;
+      border-radius: 24px;
       color: var(--muted);
-      background: rgba(255, 255, 255, 0.55);
+      background: rgba(255,255,255,0.55);
     }
 
-    @media (max-width: 1200px) {
-      .hero,
-      .overview-grid,
-      .filters,
-      .stats,
-      .summary-grid {
-        grid-template-columns: 1fr;
-      }
+    .hidden {
+      display: none !important;
     }
 
     @media (max-width: 1100px) {
-      .app {
+      .identity-grid,
+      .stat-strip,
+      .summary-grid,
+      .filter-grid,
+      .content-grid,
+      .premium-kpis {
         grid-template-columns: 1fr;
       }
 
-      .sidebar {
-        position: static;
-        height: auto;
-        border-right: 0;
-        border-bottom: 1px solid var(--line);
+      .panel-head,
+      .topbar-inner {
+        flex-direction: column;
+        align-items: flex-start;
       }
 
-      .content {
-        padding: 18px;
+      .top-meta {
+        justify-content: flex-start;
       }
     }
   </style>
 </head>
 <body>
-  <div class="app">
-    <aside class="sidebar">
-      <div class="brand">
-        <small>Live dashboard</small>
-        <h1>Attendance Dashboard</h1>
-        <div class="muted" id="generatedAt">Загрузка данных...</div>
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">WeGlobal <span>Attendance Reports</span></div>
+      <div class="top-meta">
+        <span id="topProduct">Dashboard</span>
+        <span id="generatedAt">Загрузка...</span>
       </div>
+    </div>
+  </div>
 
-      <div class="group">
-        <div class="group-title">Products</div>
-        <div class="stack" id="productList"></div>
+  <section class="hero">
+    <div class="eyebrow">Attendance intelligence</div>
+    <h1 id="heroTitle">Loading Dashboard</h1>
+    <div class="hero-copy" id="heroDescription">Подтягиваем уроки, посещаемость, группы и payroll.</div>
+
+    <div class="hero-actions">
+      <button class="btn primary active" data-view="overview">Overview</button>
+      <button class="btn secondary" data-view="lessons">Lessons</button>
+      <button class="btn secondary" data-view="payroll">Payroll</button>
+      <button class="btn secondary" data-view="students">Students</button>
+    </div>
+
+    <div class="hero-panel">
+      <div class="hero-chip-row" id="heroChipRow"></div>
+
+      <div class="identity-grid">
+        <div class="identity-card">
+          <span class="label">Product</span>
+          <div class="value" id="identityProduct">—</div>
+        </div>
+        <div class="identity-card">
+          <span class="label">Month</span>
+          <div class="value" id="identityMonth">All</div>
+        </div>
+        <div class="identity-card">
+          <span class="label">Flow</span>
+          <div class="value" id="identityFlow">All flows</div>
+        </div>
+        <div class="identity-card">
+          <span class="label">Updated</span>
+          <div class="value" id="identityUpdated">—</div>
+        </div>
       </div>
+    </div>
+  </section>
 
-      <div class="group">
-        <div class="group-title">Months</div>
-        <div class="stack" id="monthList"></div>
-      </div>
-    </aside>
-
-    <main class="content">
-      <div class="toolbar">
-        <button class="chip active" data-view="overview">Overview</button>
-        <button class="chip" data-view="lessons">Lessons</button>
-        <button class="chip" data-view="payroll">Payroll</button>
-        <button class="chip" data-view="students">Students</button>
-      </div>
-
-      <div class="filters">
+  <main class="page">
+    <div class="filter-grid">
+      <div class="filter-card">
+        <span class="label">Flow filter</span>
         <select id="flowFilter">
           <option value="">All flows</option>
         </select>
-        <input id="studentSearch" type="text" placeholder="Search student by name, surname or email" style="display:none;" />
       </div>
 
-      <section class="hero">
-        <div class="card">
-          <h2 id="heroTitle">Loading...</h2>
-          <p class="muted" id="heroDescription"></p>
+      <div class="filter-card" id="studentSearchCard" style="display:none;">
+        <span class="label">Student search</span>
+        <input id="studentSearch" type="text" placeholder="Search student by name, surname or email" />
+      </div>
+    </div>
+
+    <section class="stat-strip" id="statsGrid"></section>
+    <section class="premium-kpis" id="premiumKpis"></section>
+
+    <div id="overviewView">
+      <div class="content-grid">
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>Months and Flows</h2>
+              <div class="panel-subtle">Быстрая навигация по месяцам и группам текущего продукта.</div>
+            </div>
+            <div class="pill" id="overviewBadge">0 lessons</div>
+          </div>
+
+          <div class="months-row" id="monthList"></div>
+
+          <div style="height:14px;"></div>
+
+          <div class="flow-list" id="flowList"></div>
+        </section>
+
+        <section class="chart-card">
+          <div class="panel-head">
+            <div>
+              <h2>Parallel Load</h2>
+              <div class="panel-subtle">Сколько потоков и студентов идёт параллельно в один и тот же час.</div>
+            </div>
+            <div class="pill">Live slots</div>
+          </div>
+          <div class="chart" id="parallelChart"></div>
+        </section>
+      </div>
+    </div>
+
+    <div id="lessonsView" class="hidden">
+      <div class="lessons" id="lessonList"></div>
+    </div>
+
+    <div id="payrollView" class="hidden">
+      <section class="panel" style="margin-bottom:18px;">
+        <div class="panel-head">
+          <div>
+            <h2>Payroll by Group</h2>
+            <div class="panel-subtle">Короткие митинги меньше payroll threshold уже не должны сюда попадать.</div>
+          </div>
+          <div class="pill" id="payrollGroupBadge">0 rows</div>
         </div>
-        <div class="stats" id="statsGrid"></div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Group</th>
+                <th>Main teacher</th>
+                <th>Main lessons</th>
+                <th>Replacement</th>
+                <th>Replacement lessons</th>
+                <th>Dates</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody id="payrollGroupBody"></tbody>
+          </table>
+        </div>
       </section>
 
-      <div id="overviewView">
-        <section class="card" style="margin-bottom:18px;">
-          <h3 style="margin-bottom:12px;">Months</h3>
-          <div class="month-strip" id="monthStrip"></div>
-        </section>
-
-        <div class="overview-grid">
-          <section class="card">
-            <h3 style="margin-bottom:12px;">Flows</h3>
-            <div class="flow-list" id="flowList"></div>
-          </section>
-
-          <section class="chart-card">
-            <h3>Parallel Load</h3>
-            <div class="muted" style="margin-top:6px;">Сколько потоков и студентов идёт параллельно в одном временном слоте.</div>
-            <div class="chart" id="parallelChart"></div>
-          </section>
+      <section class="panel">
+        <div class="panel-head">
+          <div>
+            <h2>Payroll by Teacher</h2>
+            <div class="panel-subtle">Сводка по преподавателям за выбранный период.</div>
+          </div>
+          <div class="pill" id="payrollTeacherBadge">0 rows</div>
         </div>
-      </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Teacher</th>
+                <th>Total lessons</th>
+                <th>Main lessons</th>
+                <th>Replacement lessons</th>
+                <th>Groups</th>
+                <th>Replacement dates</th>
+              </tr>
+            </thead>
+            <tbody id="payrollTeacherBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
 
-      <div id="lessonsView" style="display:none;">
-        <div class="lessons" id="lessonList"></div>
-      </div>
-
-      <div id="payrollView" style="display:none;">
-        <section class="card" style="margin-bottom:18px;">
-          <h3 style="margin-bottom:12px;">By Group</h3>
-          <div class="table-card">
-            <table>
-              <thead>
-                <tr>
-                  <th>Group</th>
-                  <th>Main teacher</th>
-                  <th>Main lessons</th>
-                  <th>Replacement</th>
-                  <th>Replacement lessons</th>
-                  <th>Dates</th>
-                  <th>Total</th>
-                </tr>
-              </thead>
-              <tbody id="payrollGroupBody"></tbody>
-            </table>
+    <div id="studentsView" class="hidden">
+      <section class="panel">
+        <div class="panel-head">
+          <div>
+            <h2>Student Attendance</h2>
+            <div class="panel-subtle">Поиск по ученику или просмотр всех учеников выбранного потока.</div>
           </div>
-        </section>
-
-        <section class="card">
-          <h3 style="margin-bottom:12px;">By Teacher</h3>
-          <div class="table-card">
-            <table>
-              <thead>
-                <tr>
-                  <th>Teacher</th>
-                  <th>Total lessons</th>
-                  <th>Main lessons</th>
-                  <th>Replacement lessons</th>
-                  <th>Groups</th>
-                  <th>Replacement dates</th>
-                </tr>
-              </thead>
-              <tbody id="payrollTeacherBody"></tbody>
-            </table>
-          </div>
-        </section>
-      </div>
-
-      <div id="studentsView" style="display:none;">
+          <div class="pill" id="studentsBadge">0 students</div>
+        </div>
         <div class="students-view" id="studentsList"></div>
-      </div>
-    </main>
-  </div>
+      </section>
+    </div>
+  </main>
 
   <script>
     const state = {
@@ -586,25 +785,35 @@
     };
 
     const nodes = {
-      productList: document.getElementById("productList"),
-      monthList: document.getElementById("monthList"),
       generatedAt: document.getElementById("generatedAt"),
+      topProduct: document.getElementById("topProduct"),
       heroTitle: document.getElementById("heroTitle"),
       heroDescription: document.getElementById("heroDescription"),
+      heroChipRow: document.getElementById("heroChipRow"),
+      identityProduct: document.getElementById("identityProduct"),
+      identityMonth: document.getElementById("identityMonth"),
+      identityFlow: document.getElementById("identityFlow"),
+      identityUpdated: document.getElementById("identityUpdated"),
       statsGrid: document.getElementById("statsGrid"),
-      monthStrip: document.getElementById("monthStrip"),
+      premiumKpis: document.getElementById("premiumKpis"),
+      flowFilter: document.getElementById("flowFilter"),
+      studentSearchCard: document.getElementById("studentSearchCard"),
+      studentSearch: document.getElementById("studentSearch"),
+      overviewView: document.getElementById("overviewView"),
+      lessonsView: document.getElementById("lessonsView"),
+      payrollView: document.getElementById("payrollView"),
+      studentsView: document.getElementById("studentsView"),
+      monthList: document.getElementById("monthList"),
       flowList: document.getElementById("flowList"),
       parallelChart: document.getElementById("parallelChart"),
       lessonList: document.getElementById("lessonList"),
       payrollGroupBody: document.getElementById("payrollGroupBody"),
       payrollTeacherBody: document.getElementById("payrollTeacherBody"),
       studentsList: document.getElementById("studentsList"),
-      overviewView: document.getElementById("overviewView"),
-      lessonsView: document.getElementById("lessonsView"),
-      payrollView: document.getElementById("payrollView"),
-      studentsView: document.getElementById("studentsView"),
-      flowFilter: document.getElementById("flowFilter"),
-      studentSearch: document.getElementById("studentSearch")
+      overviewBadge: document.getElementById("overviewBadge"),
+      payrollGroupBadge: document.getElementById("payrollGroupBadge"),
+      payrollTeacherBadge: document.getElementById("payrollTeacherBadge"),
+      studentsBadge: document.getElementById("studentsBadge")
     };
 
     const monthNames = {
@@ -622,12 +831,6 @@
       "12": "Декабрь"
     };
 
-    function formatMonth(key) {
-      if (!key) return "All months";
-      const [year, month] = key.split("-");
-      return `${monthNames[month] || month} ${year}`;
-    }
-
     function escapeHtml(value) {
       return String(value ?? "")
         .replaceAll("&", "&amp;")
@@ -644,6 +847,12 @@
         .trim();
     }
 
+    function formatMonth(key) {
+      if (!key) return "All months";
+      const [year, month] = key.split("-");
+      return `${monthNames[month] || month} ${year}`;
+    }
+
     function getProductData() {
       return state.data.products[state.product];
     }
@@ -651,52 +860,42 @@
     function getLessons() {
       const product = getProductData();
       if (!product) return [];
-      return product.lessons.filter((lesson) => {
+      return (product.lessons || []).filter((lesson) => {
         const monthOk = !state.month || lesson.month_key === state.month;
         const flowOk = !state.flow || lesson.flow === state.flow;
         return monthOk && flowOk;
       });
     }
 
-    function renderProducts() {
-      nodes.productList.innerHTML = Object.entries(state.data.products).map(([key, product]) => `
-        <div class="button ${key === state.product ? "active" : ""}" data-product="${key}">
-          <strong>${key}</strong>
-          <div class="muted">${product.lesson_count} lessons • ${product.flow_count} flows</div>
-        </div>
-      `).join("");
+    function getParallelLoadRows() {
+      const lessons = getLessons();
+      const slots = {};
 
-      nodes.productList.querySelectorAll("[data-product]").forEach((el) => {
-        el.addEventListener("click", () => {
-          state.product = el.dataset.product;
-          state.month = "";
-          state.flow = "";
-          state.studentQuery = "";
-          nodes.studentSearch.value = "";
-          render();
-        });
+      lessons.forEach((lesson) => {
+        const start = lesson.lesson_start;
+        const end = lesson.lesson_end;
+        if (!start || !end) return;
+
+        const startHour = Number(start.split(":")[0]);
+        const endHour = Number(end.split(":")[0]);
+
+        for (let hour = startHour; hour <= endHour; hour += 1) {
+          const slot = String(hour).padStart(2, "0") + ":00";
+          if (!slots[slot]) {
+            slots[slot] = { hour: slot, groups: new Set(), students: 0 };
+          }
+          slots[slot].groups.add(lesson.flow);
+          slots[slot].students += Number(lesson.student_count || 0);
+        }
       });
-    }
 
-    function renderMonths() {
-      const product = getProductData();
-      const monthItems = [
-        { month_key: "", lesson_count: product.lesson_count, flow_count: product.flow_count }
-      ].concat(product.months || []);
-
-      nodes.monthList.innerHTML = monthItems.map((month) => `
-        <div class="button ${month.month_key === state.month ? "active" : ""}" data-month="${month.month_key}">
-          <strong>${month.month_key ? formatMonth(month.month_key) : "All months"}</strong>
-          <div class="muted">${month.lesson_count} lessons • ${month.flow_count} flows</div>
-        </div>
-      `).join("");
-
-      nodes.monthList.querySelectorAll("[data-month]").forEach((el) => {
-        el.addEventListener("click", () => {
-          state.month = el.dataset.month;
-          render();
-        });
-      });
+      return Object.values(slots)
+        .map((row) => ({
+          hour: row.hour,
+          groups: row.groups.size,
+          students: row.students
+        }))
+        .sort((a, b) => a.hour.localeCompare(b.hour));
     }
 
     function renderFlowFilter() {
@@ -711,21 +910,34 @@
       `;
     }
 
-    function renderHero() {
+    function renderHeader() {
       const lessons = getLessons();
+      const allStudents = lessons.flatMap((lesson) => (lesson.rows || []).filter((row) => row.role === "Student"));
+      const uniqueStudents = new Set(allStudents.map((row) => `${normalize(row.name)}|${normalize(row.email || "")}`)).size;
+
+      nodes.generatedAt.textContent = `Updated: ${state.data.generated_at} (${state.data.timezone})`;
+      nodes.topProduct.textContent = `${state.product} • ${lessons.length} lessons`;
+      nodes.identityProduct.textContent = state.product || "—";
+      nodes.identityMonth.textContent = state.month ? formatMonth(state.month) : "All months";
+      nodes.identityFlow.textContent = state.flow || "All flows";
+      nodes.identityUpdated.textContent = state.data.generated_at || "—";
+
+      nodes.heroTitle.textContent = `${state.product} Attendance Dashboard`;
+      nodes.heroDescription.textContent =
+        state.view === "students"
+          ? "Ищем одного ученика или открываем полную attendance-ленту по выбранному потоку."
+          : "Уроки, payroll, потоки, ученики и параллельная нагрузка в одном аккуратном отчёте.";
+
+      nodes.heroChipRow.innerHTML = [
+        state.product,
+        state.month ? formatMonth(state.month) : "All months",
+        state.flow || "All flows",
+        `${uniqueStudents} unique students`
+      ].map((item) => `<span class="hero-chip">${escapeHtml(item)}</span>`).join("");
+
       const flowCount = new Set(lessons.map((lesson) => lesson.flow)).size;
       const teacherCount = new Set(lessons.map((lesson) => lesson.teacher)).size;
       const maxStudents = lessons.reduce((max, lesson) => Math.max(max, Number(lesson.student_count || 0)), 0);
-
-      nodes.heroTitle.textContent =
-        `${state.product} Dashboard` +
-        `${state.month ? " • " + formatMonth(state.month) : ""}` +
-        `${state.flow ? " • " + state.flow : ""}`;
-
-      nodes.heroDescription.textContent =
-        state.view === "students"
-          ? "Поиск по ученикам и просмотр attendance по каждому студенту или по целому потоку."
-          : "Можно смотреть уроки, attendance, payroll и общую параллельную нагрузку.";
 
       nodes.statsGrid.innerHTML = [
         ["Lessons", lessons.length],
@@ -733,19 +945,88 @@
         ["Teachers", teacherCount],
         ["Peak students", maxStudents]
       ].map(([label, value]) => `
-        <div class="stat">${label}<b>${value}</b></div>
-      `).join("");
-
-      nodes.monthStrip.innerHTML = (getProductData().months || []).map((month) => `
-        <div class="month-pill">
-          <small style="display:block;opacity:.8;">Month</small>
-          <strong>${formatMonth(month.month_key)}</strong>
-          ${month.lesson_count} lessons • ${month.flow_count} flows
+        <div class="stat-card">
+          <span class="label">${label}</span>
+          <div class="value">${value}</div>
         </div>
       `).join("");
+
+      const statusTotals = lessons.reduce((acc, lesson) => {
+        const counts = lesson.status_counts || {};
+        acc.full += Number(counts["Full lesson"] || 0);
+        acc.late += Number(counts["Late"] || 0) + Number(counts["Late + Left early"] || 0);
+        acc.leftEarly += Number(counts["Left early"] || 0) + Number(counts["Late + Left early"] || 0);
+        acc.students += Number(lesson.student_count || 0);
+        return acc;
+      }, { full: 0, late: 0, leftEarly: 0, students: 0 });
+
+      const attendanceRate = statusTotals.students
+        ? Math.round((statusTotals.full / statusTotals.students) * 100)
+        : 0;
+
+      const avgStudents = lessons.length
+        ? Math.round(statusTotals.students / lessons.length)
+        : 0;
+
+      const busiestHour = getParallelLoadRows().sort((a, b) => b.groups - a.groups)[0];
+
+      nodes.premiumKpis.innerHTML = [
+        {
+          label: "Full attendance rate",
+          value: `${attendanceRate}%`,
+          sub: "Доля студентов, которые отсидели полный урок без late/left early."
+        },
+        {
+          label: "Average students / lesson",
+          value: avgStudents,
+          sub: "Среднее количество студентов на урок по текущему фильтру."
+        },
+        {
+          label: "Late / left early",
+          value: `${statusTotals.late}/${statusTotals.leftEarly}`,
+          sub: "Сводный сигнал по опозданиям и ранним выходам."
+        },
+        {
+          label: "Busiest slot",
+          value: busiestHour ? busiestHour.hour : "—",
+          sub: busiestHour ? `${busiestHour.groups} groups • ${busiestHour.students} students` : "Нет данных по слотам."
+        }
+      ].map((item) => `
+        <div class="kpi-card">
+          <div class="kpi-top">
+            <span class="label" style="margin-bottom:0;">${item.label}</span>
+            <span class="pill">Insight</span>
+          </div>
+          <div class="kpi-value">${item.value}</div>
+          <div class="kpi-sub">${item.sub}</div>
+        </div>
+      `).join("");
+
+      nodes.overviewBadge.textContent = `${lessons.length} lessons`;
     }
 
-    function renderOverview() {
+    function renderMonths() {
+      const product = getProductData();
+      const monthItems = [
+        { month_key: "", lesson_count: product.lesson_count, flow_count: product.flow_count }
+      ].concat(product.months || []);
+
+      nodes.monthList.innerHTML = monthItems.map((month) => `
+        <div class="month-card" data-month="${month.month_key}" style="cursor:pointer; border:${month.month_key === state.month ? '1px solid rgba(0,113,227,0.28)' : '1px solid rgba(255,255,255,0.88)'};">
+          <strong>${month.month_key ? formatMonth(month.month_key) : "All months"}</strong>
+          <div class="muted">${month.lesson_count} lessons • ${month.flow_count} flows</div>
+        </div>
+      `).join("");
+
+      nodes.monthList.querySelectorAll("[data-month]").forEach((item) => {
+        item.addEventListener("click", () => {
+          state.month = item.dataset.month;
+          render();
+        });
+      });
+    }
+
+    function renderFlows() {
       const lessons = getLessons();
       const flows = {};
 
@@ -756,69 +1037,40 @@
         flows[lesson.flow].push(lesson);
       });
 
-      const sortedFlows = Object.entries(flows).sort((a, b) => b[1].length - a[1].length);
+      const sorted = Object.entries(flows).sort((a, b) => b[1].length - a[1].length);
 
-      nodes.flowList.innerHTML = sortedFlows.length
-        ? sortedFlows.map(([flow, flowLessons]) => {
+      nodes.flowList.innerHTML = sorted.length
+        ? sorted.map(([flow, flowLessons]) => {
             const peak = flowLessons.reduce((max, lesson) => Math.max(max, Number(lesson.student_count || 0)), 0);
             const teachers = new Set(flowLessons.map((lesson) => lesson.teacher)).size;
+            const avg = flowLessons.length
+              ? Math.round(flowLessons.reduce((sum, lesson) => sum + Number(lesson.student_count || 0), 0) / flowLessons.length)
+              : 0;
+
             return `
-              <div class="flow-item">
+              <div class="flow-card">
                 <strong>${escapeHtml(flow)}</strong>
-                <div class="muted">${flowLessons.length} lessons • ${peak} peak students • ${teachers} teachers</div>
+                <div class="muted">${flowLessons.length} lessons • ${peak} peak students • ${teachers} teachers • ${avg} avg students</div>
               </div>
             `;
           }).join("")
-        : '<div class="empty">No lessons for this selection yet.</div>';
+        : '<div class="empty">No flows for this selection.</div>';
+    }
 
-      const product = getProductData();
-      const chartSource = (product.parallel_load || []).filter((row) => {
-        if (!state.flow && !state.month) return true;
-
-        const relatedLessons = (product.lessons || []).filter((lesson) => {
-          const monthOk = !state.month || lesson.month_key === state.month;
-          const flowOk = !state.flow || lesson.flow === state.flow;
-          return monthOk && flowOk;
-        });
-
-        const perHour = {};
-        relatedLessons.forEach((lesson) => {
-          const start = lesson.lesson_start;
-          const end = lesson.lesson_end;
-          if (!start || !end) return;
-
-          const [startHour] = start.split(":");
-          const [endHour] = end.split(":");
-          let hour = Number(startHour);
-          const finish = Number(endHour);
-
-          while (hour <= finish) {
-            const slot = String(hour).padStart(2, "0") + ":00";
-            if (!perHour[slot]) {
-              perHour[slot] = { groups: new Set(), students: 0 };
-            }
-            perHour[slot].groups.add(lesson.flow);
-            perHour[slot].students += Number(lesson.student_count || 0);
-            hour += 1;
-          }
-        });
-
-        return Boolean(perHour[row.hour]);
-      });
-
-      const rows = chartSource.length ? chartSource : [];
-      const maxGroups = Math.max(...rows.map((r) => Number(r.groups || 0)), 1);
+    function renderParallelLoad() {
+      const rows = getParallelLoadRows();
+      const maxGroups = Math.max(...rows.map((row) => row.groups), 1);
 
       nodes.parallelChart.innerHTML = rows.length
         ? rows.map((row) => `
-            <div class="chart-row">
-              <strong>${escapeHtml(row.hour)}</strong>
-              <div class="bar-wrap">
-                <div class="bar" style="width:${(Number(row.groups || 0) / maxGroups) * 100}%"></div>
-              </div>
-              <span class="muted">${Number(row.groups || 0)} groups • ${Number(row.students || 0)} students</span>
+          <div class="chart-row">
+            <strong>${escapeHtml(row.hour)}</strong>
+            <div class="bar-wrap">
+              <div class="bar" style="width:${(row.groups / maxGroups) * 100}%"></div>
             </div>
-          `).join("")
+            <span class="muted">${row.groups} groups • ${row.students} students</span>
+          </div>
+        `).join("")
         : '<div class="empty">No parallel load data for this selection.</div>';
     }
 
@@ -842,68 +1094,68 @@
 
       nodes.lessonList.innerHTML = lessons.length
         ? lessons.map((lesson, index) => `
-            <details class="lesson" ${index === 0 ? "open" : ""}>
-              <summary>
-                <div class="lesson-head">
-                  <div>
-                    <h3>${escapeHtml(lesson.flow)} • ${escapeHtml(lesson.meeting_date)}</h3>
-                    <div class="muted">
-                      Teacher: ${escapeHtml(lesson.teacher)} • ${escapeHtml(lesson.meeting_name)}
-                      • ${escapeHtml(lesson.lesson_start || "--:--")} - ${escapeHtml(lesson.lesson_end || "--:--")}
-                    </div>
+          <details class="lesson" ${index === 0 ? "open" : ""}>
+            <summary>
+              <div class="lesson-head">
+                <div>
+                  <h3>${escapeHtml(lesson.flow)} • ${escapeHtml(lesson.meeting_date)}</h3>
+                  <div class="muted" style="margin-top:8px;">
+                    Teacher: ${escapeHtml(lesson.teacher)} • ${escapeHtml(lesson.meeting_name)} •
+                    ${escapeHtml(lesson.lesson_start || "--:--")} - ${escapeHtml(lesson.lesson_end || "--:--")}
                   </div>
-                  <div class="lesson-tags">${lessonTags(lesson)}</div>
                 </div>
-              </summary>
-
-              <div class="lesson-body">
-                <div class="summary-grid">
-                  <div class="summary-box">Students<b>${lesson.student_count}</b></div>
-                  <div class="summary-box">Moderators<b>${lesson.moderator_count}</b></div>
-                  <div class="summary-box">Full lesson<b>${lesson.status_counts?.["Full lesson"] || 0}</b></div>
-                  <div class="summary-box">Late<b>${(lesson.status_counts?.["Late"] || 0) + (lesson.status_counts?.["Late + Left early"] || 0)}</b></div>
-                  <div class="summary-box">Left early<b>${(lesson.status_counts?.["Left early"] || 0) + (lesson.status_counts?.["Late + Left early"] || 0)}</b></div>
-                </div>
-
-                <div class="table-card">
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Role</th>
-                        <th>Duration</th>
-                        <th>Activity</th>
-                        <th>Talk</th>
-                        <th>Webcam</th>
-                        <th>Messages</th>
-                        <th>Join</th>
-                        <th>Left</th>
-                        <th>Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      ${lesson.rows.map((row) => `
-                        <tr class="${row.role === "Moderator" ? "teacher" : ""}">
-                          <td>${escapeHtml(row.name)}</td>
-                          <td>${escapeHtml(row.email || "")}</td>
-                          <td>${escapeHtml(row.role)}</td>
-                          <td>${escapeHtml(row.duration)}</td>
-                          <td>${escapeHtml(row.activity_score)}</td>
-                          <td>${escapeHtml(row.talk_time)}</td>
-                          <td>${escapeHtml(row.webcam_time)}</td>
-                          <td>${escapeHtml(row.messages)}</td>
-                          <td>${escapeHtml(row.join)}</td>
-                          <td>${escapeHtml(row.left)}</td>
-                          <td>${escapeHtml(row.status)}</td>
-                        </tr>
-                      `).join("")}
-                    </tbody>
-                  </table>
-                </div>
+                <div class="lesson-tags">${lessonTags(lesson)}</div>
               </div>
-            </details>
-          `).join("")
+            </summary>
+
+            <div class="lesson-body">
+              <div class="summary-grid">
+                <div class="summary-box"><span class="label">Students</span><b>${lesson.student_count}</b></div>
+                <div class="summary-box"><span class="label">Moderators</span><b>${lesson.moderator_count}</b></div>
+                <div class="summary-box"><span class="label">Full lesson</span><b>${lesson.status_counts?.["Full lesson"] || 0}</b></div>
+                <div class="summary-box"><span class="label">Late</span><b>${(lesson.status_counts?.["Late"] || 0) + (lesson.status_counts?.["Late + Left early"] || 0)}</b></div>
+                <div class="summary-box"><span class="label">Left early</span><b>${(lesson.status_counts?.["Left early"] || 0) + (lesson.status_counts?.["Late + Left early"] || 0)}</b></div>
+              </div>
+
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Email</th>
+                      <th>Role</th>
+                      <th>Duration</th>
+                      <th>Activity</th>
+                      <th>Talk</th>
+                      <th>Webcam</th>
+                      <th>Messages</th>
+                      <th>Join</th>
+                      <th>Left</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${(lesson.rows || []).map((row) => `
+                      <tr class="${row.role === "Moderator" ? "teacher" : ""}">
+                        <td>${escapeHtml(row.name)}</td>
+                        <td>${escapeHtml(row.email || "")}</td>
+                        <td>${escapeHtml(row.role)}</td>
+                        <td>${escapeHtml(row.duration)}</td>
+                        <td>${escapeHtml(row.activity_score)}</td>
+                        <td>${escapeHtml(row.talk_time)}</td>
+                        <td>${escapeHtml(row.webcam_time)}</td>
+                        <td>${escapeHtml(row.messages)}</td>
+                        <td>${escapeHtml(row.join)}</td>
+                        <td>${escapeHtml(row.left)}</td>
+                        <td>${escapeHtml(row.status)}</td>
+                      </tr>
+                    `).join("")}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </details>
+        `).join("")
         : '<div class="empty">No lessons for this selection yet.</div>';
     }
 
@@ -921,31 +1173,34 @@
         return monthOk;
       });
 
+      nodes.payrollGroupBadge.textContent = `${byGroup.length} rows`;
+      nodes.payrollTeacherBadge.textContent = `${byTeacher.length} rows`;
+
       nodes.payrollGroupBody.innerHTML = byGroup.length
         ? byGroup.map((row) => `
-            <tr>
-              <td>${escapeHtml(row.group)}</td>
-              <td>${escapeHtml(row.main_teacher)}</td>
-              <td>${row.main_lessons}</td>
-              <td>${escapeHtml(row.replacement_teacher)}</td>
-              <td>${row.replacement_lessons}</td>
-              <td>${escapeHtml(row.replacement_dates)}</td>
-              <td>${row.total_lessons}</td>
-            </tr>
-          `).join("")
+          <tr>
+            <td>${escapeHtml(row.group)}</td>
+            <td>${escapeHtml(row.main_teacher)}</td>
+            <td>${row.main_lessons}</td>
+            <td>${escapeHtml(row.replacement_teacher)}</td>
+            <td>${row.replacement_lessons}</td>
+            <td>${escapeHtml(row.replacement_dates)}</td>
+            <td>${row.total_lessons}</td>
+          </tr>
+        `).join("")
         : '<tr><td colspan="7">No payroll data yet.</td></tr>';
 
       nodes.payrollTeacherBody.innerHTML = byTeacher.length
         ? byTeacher.map((row) => `
-            <tr>
-              <td>${escapeHtml(row.teacher)}</td>
-              <td>${row.total_lessons}</td>
-              <td>${row.main_lessons}</td>
-              <td>${row.replacement_lessons}</td>
-              <td>${escapeHtml(row.groups)}</td>
-              <td>${escapeHtml(row.replacement_dates)}</td>
-            </tr>
-          `).join("")
+          <tr>
+            <td>${escapeHtml(row.teacher)}</td>
+            <td>${row.total_lessons}</td>
+            <td>${row.main_lessons}</td>
+            <td>${row.replacement_lessons}</td>
+            <td>${escapeHtml(row.groups)}</td>
+            <td>${escapeHtml(row.replacement_dates)}</td>
+          </tr>
+        `).join("")
         : '<tr><td colspan="6">No payroll data yet.</td></tr>';
     }
 
@@ -1018,67 +1273,65 @@
 
     function renderStudents() {
       const results = buildStudentSearchResults();
+      nodes.studentsBadge.textContent = `${results.length} students`;
 
       if ((!state.studentQuery || state.studentQuery.trim().length < 2) && !state.flow) {
-        nodes.studentsList.innerHTML =
-          '<div class="empty">Type at least 2 characters to search, or choose a flow to see all students in that flow.</div>';
+        nodes.studentsList.innerHTML = '<div class="empty">Type at least 2 characters to search, or choose a flow to see all students in that flow.</div>';
         return;
       }
 
       nodes.studentsList.innerHTML = results.length
         ? results.map((student) => `
-            <div class="student-card">
-              <h3>${escapeHtml(student.name)}</h3>
-              <div class="muted">${escapeHtml(student.email || "No email in source data")}</div>
+          <div class="student-card">
+            <strong>${escapeHtml(student.name)}</strong>
+            <div class="muted">${escapeHtml(student.email || "No email in source data")}</div>
 
-              <div class="student-meta">
-                <span class="tag">${student.lessonCount} lessons</span>
-                <span class="tag good">${student.monthCount} months</span>
-                <span class="tag warn">${student.flowCount} flows</span>
-              </div>
-
-              <div class="student-meta" style="margin-top:12px;">
-                ${Object.entries(student.statuses).map(([status, count]) => `
-                  <span class="tag">${escapeHtml(status)}: ${count}</span>
-                `).join("")}
-              </div>
-
-              <div class="student-lessons">
-                ${student.lessons.map((lesson) => `
-                  <div class="student-lesson-row">
-                    <strong>${escapeHtml(lesson.product)} • ${escapeHtml(lesson.flow)}</strong>
-                    <div class="muted">${escapeHtml(lesson.meeting_date)} • Teacher: ${escapeHtml(lesson.teacher)}</div>
-                    <div class="muted">
-                      Status: ${escapeHtml(lesson.status)} • Duration: ${escapeHtml(lesson.duration)}
-                      • Join: ${escapeHtml(lesson.join)} • Left: ${escapeHtml(lesson.left)}
-                    </div>
-                  </div>
-                `).join("")}
-              </div>
+            <div class="student-meta" style="margin-top:12px;">
+              <span class="tag">${student.lessonCount} lessons</span>
+              <span class="tag good">${student.monthCount} months</span>
+              <span class="tag warn">${student.flowCount} flows</span>
             </div>
-          `).join("")
+
+            <div class="student-meta" style="margin-top:12px;">
+              ${Object.entries(student.statuses).map(([status, count]) => `
+                <span class="tag">${escapeHtml(status)}: ${count}</span>
+              `).join("")}
+            </div>
+
+            <div class="student-lessons">
+              ${student.lessons.map((lesson) => `
+                <div class="student-lesson-row">
+                  <strong>${escapeHtml(lesson.product)} • ${escapeHtml(lesson.flow)}</strong>
+                  <div class="muted">${escapeHtml(lesson.meeting_date)} • Teacher: ${escapeHtml(lesson.teacher)}</div>
+                  <div class="muted">Status: ${escapeHtml(lesson.status)} • Duration: ${escapeHtml(lesson.duration)} • Join: ${escapeHtml(lesson.join)} • Left: ${escapeHtml(lesson.left)}</div>
+                </div>
+              `).join("")}
+            </div>
+          </div>
+        `).join("")
         : '<div class="empty">No students found for this selection.</div>';
     }
 
     function renderView() {
-      nodes.overviewView.style.display = state.view === "overview" ? "" : "none";
-      nodes.lessonsView.style.display = state.view === "lessons" ? "" : "none";
-      nodes.payrollView.style.display = state.view === "payroll" ? "" : "none";
-      nodes.studentsView.style.display = state.view === "students" ? "" : "none";
-
-      nodes.studentSearch.style.display = state.view === "students" ? "" : "none";
+      nodes.overviewView.classList.toggle("hidden", state.view !== "overview");
+      nodes.lessonsView.classList.toggle("hidden", state.view !== "lessons");
+      nodes.payrollView.classList.toggle("hidden", state.view !== "payroll");
+      nodes.studentsView.classList.toggle("hidden", state.view !== "students");
+      nodes.studentSearchCard.style.display = state.view === "students" ? "" : "none";
 
       document.querySelectorAll("[data-view]").forEach((button) => {
         button.classList.toggle("active", button.dataset.view === state.view);
+        button.classList.toggle("primary", button.dataset.view === state.view);
+        button.classList.toggle("secondary", button.dataset.view !== state.view);
       });
     }
 
     function render() {
-      renderProducts();
-      renderMonths();
       renderFlowFilter();
-      renderHero();
-      renderOverview();
+      renderHeader();
+      renderMonths();
+      renderFlows();
+      renderParallelLoad();
       renderLessons();
       renderPayroll();
       renderStudents();
@@ -1121,10 +1374,8 @@
         if (!products.length) {
           throw new Error("dashboard_data.json загружен, но products пустой");
         }
-
         state.product = products[0];
         state.month = "";
-        nodes.generatedAt.textContent = `Updated: ${data.generated_at} (${data.timezone})`;
         render();
       })
       .catch((error) => {
@@ -1132,6 +1383,9 @@
         nodes.heroTitle.textContent = "Loading failed";
         nodes.heroDescription.textContent = error.message;
         nodes.overviewView.innerHTML = `<div class="empty">${escapeHtml(error.message)}</div>`;
+        nodes.lessonsView.innerHTML = "";
+        nodes.payrollView.innerHTML = "";
+        nodes.studentsView.innerHTML = "";
       });
   </script>
 </body>
