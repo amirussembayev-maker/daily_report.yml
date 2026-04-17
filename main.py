@@ -12,6 +12,7 @@ from playwright.sync_api import sync_playwright
 
 
 APP_TIMEZONE = ZoneInfo(os.getenv("REPORT_TIMEZONE", "Asia/Almaty"))
+MIN_LESSON_MINUTES_FOR_PAYROLL = int(os.getenv("MIN_LESSON_MINUTES_FOR_PAYROLL", "40"))
 
 SHEET_COLUMNS = [
     "Name",
@@ -124,6 +125,26 @@ def parse_meeting_datetime(meeting_date: str) -> datetime:
         except ValueError:
             continue
     raise ValueError(f"Не удалось распарсить дату встречи: '{meeting_date}'")
+
+
+def parse_join_left(value):
+    if pd.isna(value):
+        return None
+    text = str(value).strip()
+    if not text or text == "-":
+        return None
+
+    patterns = [
+        "%m/%d/%Y, %I:%M:%S %p",
+        "%m/%d/%Y, %I:%M %p",
+        "%Y-%m-%d %H:%M:%S",
+    ]
+    for pattern in patterns:
+        try:
+            return datetime.strptime(text, pattern)
+        except ValueError:
+            continue
+    return None
 
 
 def load_runtime_config() -> dict:
@@ -265,6 +286,15 @@ def pick_teacher_name(df: pd.DataFrame) -> str:
         na_position="last",
     )
     return str(moderators.iloc[0]["Name"]).strip() or "Unknown"
+
+
+def get_lesson_duration_minutes(df: pd.DataFrame) -> int:
+    if df.empty:
+        return 0
+    durations = df["Duration"].apply(parse_duration_to_seconds)
+    if durations.empty:
+        return 0
+    return int(durations.max() // 60)
 
 
 def prepare_dataframe(file_path: str) -> pd.DataFrame:
@@ -573,7 +603,19 @@ def write_lesson_sheet(spreadsheet, flow_name: str, meeting_dt: datetime, teache
 def build_lesson_payload(product: str, flow_name: str, meeting_name: str, meeting_dt: datetime, teacher_name: str, df: pd.DataFrame) -> str:
     students_df = df[df["Role"] == "Student"].copy()
     rows = []
+
+    join_values = []
+    left_values = []
+
     for _, row in df.iterrows():
+        join_dt = parse_join_left(row["Join"])
+        left_dt = parse_join_left(row["Left"])
+
+        if join_dt:
+            join_values.append(join_dt)
+        if left_dt:
+            left_values.append(left_dt)
+
         rows.append(
             {
                 "name": str(row["Name"]),
@@ -591,6 +633,10 @@ def build_lesson_payload(product: str, flow_name: str, meeting_name: str, meetin
         )
 
     status_counts = students_df["Status"].value_counts().to_dict() if not students_df.empty else {}
+
+    lesson_start = min(join_values).strftime("%H:%M") if join_values else meeting_dt.strftime("%H:%M")
+    lesson_end = max(left_values).strftime("%H:%M") if left_values else meeting_dt.strftime("%H:%M")
+
     payload = {
         "lesson_id": compute_lesson_id(product, flow_name, meeting_dt),
         "product": product,
@@ -602,7 +648,8 @@ def build_lesson_payload(product: str, flow_name: str, meeting_name: str, meetin
         "student_count": int((df["Role"] == "Student").sum()),
         "moderator_count": int((df["Role"] == "Moderator").sum()),
         "status_counts": status_counts,
-        "start_hour": meeting_dt.strftime("%H:00"),
+        "lesson_start": lesson_start,
+        "lesson_end": lesson_end,
         "rows": rows,
     }
     return json.dumps(payload, ensure_ascii=False, separators=(",", ":"))
@@ -764,7 +811,6 @@ def export_dashboard_site(spreadsheets: dict):
             month_key = lesson.get("month_key", "unknown")
             flow_name = lesson.get("flow", "")
             teacher_name = lesson.get("teacher", "")
-            start_hour = lesson.get("start_hour", "unknown")
             student_count = int(lesson.get("student_count", 0))
 
             flows_set.add(flow_name)
@@ -785,12 +831,30 @@ def export_dashboard_site(spreadsheets: dict):
             bucket["teachers"].add(teacher_name)
             bucket["student_total"] += student_count
 
-            load_bucket = parallel_load.setdefault(
-                start_hour,
-                {"hour": start_hour, "groups": 0, "students": 0},
-            )
-            load_bucket["groups"] += 1
-            load_bucket["students"] += student_count
+            lesson_start = lesson.get("lesson_start")
+            lesson_end = lesson.get("lesson_end")
+
+            if lesson_start and lesson_end:
+                try:
+                    start_dt = datetime.strptime(lesson_start, "%H:%M")
+                    end_dt = datetime.strptime(lesson_end, "%H:%M")
+                    cursor = start_dt.replace(minute=0)
+                    if cursor > start_dt:
+                        cursor -= timedelta(hours=1)
+
+                    while cursor <= end_dt:
+                        slot = cursor.strftime("%H:00")
+                        load_bucket = parallel_load.setdefault(
+                            slot,
+                            {"hour": slot, "groups": 0, "students": 0, "flows": set()},
+                        )
+                        if flow_name not in load_bucket["flows"]:
+                            load_bucket["groups"] += 1
+                            load_bucket["flows"].add(flow_name)
+                        load_bucket["students"] += student_count
+                        cursor += timedelta(hours=1)
+                except ValueError:
+                    pass
 
         month_list = []
         for month in sorted(months.keys(), reverse=True):
@@ -805,7 +869,16 @@ def export_dashboard_site(spreadsheets: dict):
                 }
             )
 
-        parallel_load_list = [parallel_load[key] for key in sorted(parallel_load.keys())]
+        parallel_load_list = []
+        for key in sorted(parallel_load.keys()):
+            row = parallel_load[key]
+            parallel_load_list.append(
+                {
+                    "hour": row["hour"],
+                    "groups": row["groups"],
+                    "students": row["students"],
+                }
+            )
 
         payroll_by_group = []
         payroll_by_teacher = []
@@ -1112,6 +1185,9 @@ def process_lessons(files: list[dict], spreadsheets: dict):
         spreadsheet = spreadsheets[product]
         month_key = build_month_key(meeting_dt)
         student_count = int((df["Role"] == "Student").sum())
+        lesson_duration_minutes = get_lesson_duration_minutes(df)
+        count_for_payroll = lesson_duration_minutes >= MIN_LESSON_MINUTES_FOR_PAYROLL
+
         lesson_already_exists = lesson_id in existing_ids_by_product[product]
         archive_exists = lesson_id in existing_archive_ids_by_product[product]
 
@@ -1142,20 +1218,23 @@ def process_lessons(files: list[dict], spreadsheets: dict):
                 ],
             )
 
-            payroll_log_ws = ensure_meta_sheet(spreadsheet, "_PAYROLL_LOG", PAYROLL_LOG_COLUMNS)
-            append_payroll_row(
-                payroll_log_ws,
-                [
-                    lesson_id,
-                    month_key,
-                    product,
-                    flow_name,
-                    meeting_name,
-                    meeting_dt.strftime("%Y-%m-%d"),
-                    teacher_name,
-                    str(student_count),
-                ],
-            )
+            if count_for_payroll:
+                payroll_log_ws = ensure_meta_sheet(spreadsheet, "_PAYROLL_LOG", PAYROLL_LOG_COLUMNS)
+                append_payroll_row(
+                    payroll_log_ws,
+                    [
+                        lesson_id,
+                        month_key,
+                        product,
+                        flow_name,
+                        meeting_name,
+                        meeting_dt.strftime("%Y-%m-%d"),
+                        teacher_name,
+                        str(student_count),
+                    ],
+                )
+            else:
+                print(f"  [{product}] Урок '{flow_name}' слишком короткий ({lesson_duration_minutes} мин), не считаю в payroll")
 
         archive_ws = ensure_meta_sheet(spreadsheet, "_LESSON_ARCHIVE", LESSON_ARCHIVE_COLUMNS)
         if not archive_exists:
