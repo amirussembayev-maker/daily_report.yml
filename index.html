@@ -19,7 +19,9 @@
       --shadow: 0 14px 28px rgba(61, 48, 28, 0.08);
     }
 
-    * { box-sizing: border-box; }
+    * {
+      box-sizing: border-box;
+    }
 
     body {
       margin: 0;
@@ -39,7 +41,7 @@
 
     .sidebar {
       padding: 24px;
-      background: rgba(255, 253, 248, 0.88);
+      background: rgba(255, 253, 248, 0.9);
       border-right: 1px solid var(--line);
       position: sticky;
       top: 0;
@@ -57,10 +59,24 @@
       font-family: Georgia, "Times New Roman", serif;
     }
 
-    .muted { color: var(--muted); }
-    .brand { margin-bottom: 24px; }
-    .brand small { color: var(--muted); display: block; margin-bottom: 6px; }
-    .group { margin-bottom: 22px; }
+    .muted {
+      color: var(--muted);
+    }
+
+    .brand {
+      margin-bottom: 24px;
+    }
+
+    .brand small {
+      color: var(--muted);
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .group {
+      margin-bottom: 22px;
+    }
+
     .group-title {
       font-size: 12px;
       letter-spacing: 0.12em;
@@ -69,9 +85,19 @@
       margin-bottom: 10px;
     }
 
-    .stack { display: grid; gap: 10px; }
+    .stack {
+      display: grid;
+      gap: 10px;
+    }
 
-    .card, .button, .stat, .lesson, .table-card, .chart-card, .student-card {
+    .card,
+    .button,
+    .stat,
+    .lesson,
+    .table-card,
+    .chart-card,
+    .student-card,
+    .flow-item {
       border: 1px solid var(--line);
       background: var(--panel);
       border-radius: 18px;
@@ -81,10 +107,11 @@
     .button {
       padding: 12px 14px;
       cursor: pointer;
-      transition: transform .15s ease, border-color .15s ease;
+      transition: transform 0.15s ease, border-color 0.15s ease;
     }
 
-    .button.active, .button:hover {
+    .button.active,
+    .button:hover {
       border-color: var(--accent-2);
       transform: translateY(-1px);
     }
@@ -106,7 +133,7 @@
       padding: 10px 14px;
       border-radius: 999px;
       border: 1px solid var(--line);
-      background: rgba(255,255,255,.72);
+      background: rgba(255, 255, 255, 0.72);
       cursor: pointer;
       font-weight: 600;
     }
@@ -119,7 +146,7 @@
 
     .filters {
       display: grid;
-      grid-template-columns: minmax(180px, 240px) minmax(220px, 1fr);
+      grid-template-columns: minmax(180px, 260px) minmax(220px, 1fr);
       gap: 12px;
       margin-bottom: 18px;
     }
@@ -129,7 +156,7 @@
       width: 100%;
       border: 1px solid var(--line);
       border-radius: 14px;
-      background: rgba(255,255,255,.85);
+      background: rgba(255, 255, 255, 0.88);
       padding: 12px 14px;
       font-size: 14px;
       color: var(--text);
@@ -142,7 +169,9 @@
       margin-bottom: 20px;
     }
 
-    .card { padding: 20px; }
+    .card {
+      padding: 20px;
+    }
 
     .stats {
       display: grid;
@@ -181,7 +210,7 @@
 
     .overview-grid {
       display: grid;
-      grid-template-columns: 1.2fr .8fr;
+      grid-template-columns: 1.2fr 0.8fr;
       gap: 18px;
     }
 
@@ -191,10 +220,8 @@
     }
 
     .flow-item {
-      border: 1px solid var(--line);
-      border-radius: 16px;
       padding: 14px;
-      background: rgba(255,255,255,.78);
+      background: rgba(255, 255, 255, 0.82);
     }
 
     .chart-card {
@@ -240,10 +267,12 @@
       list-style: none;
       cursor: pointer;
       padding: 18px;
-      background: linear-gradient(90deg, rgba(240,195,122,.22), rgba(255,255,255,0));
+      background: linear-gradient(90deg, rgba(240, 195, 122, 0.22), rgba(255, 255, 255, 0));
     }
 
-    .lesson summary::-webkit-details-marker { display: none; }
+    .lesson summary::-webkit-details-marker {
+      display: none;
+    }
 
     .lesson-head {
       display: flex;
@@ -281,24 +310,36 @@
       white-space: nowrap;
     }
 
-    .tag.good { background: #dfefe4; color: var(--good); }
-    .tag.warn { background: #f7e6d8; color: var(--warn); }
-    .tag.bad { background: #f7dddd; color: var(--bad); }
+    .tag.good {
+      background: #dfefe4;
+      color: var(--good);
+    }
+
+    .tag.warn {
+      background: #f7e6d8;
+      color: var(--warn);
+    }
+
+    .tag.bad {
+      background: #f7dddd;
+      color: var(--bad);
+    }
 
     .lesson-body {
       padding: 0 18px 18px;
       display: grid;
-      gap: 16px;
+      gap: 18px;
     }
 
     .summary-grid {
       display: grid;
       grid-template-columns: repeat(5, minmax(150px, 1fr));
-      gap: 14px;
+      gap: 16px;
+      padding-top: 4px;
     }
 
     .summary-box {
-      padding: 16px;
+      padding: 18px 16px;
       border-radius: 14px;
       background: #f8f4eb;
       border: 1px solid var(--line);
@@ -307,8 +348,9 @@
 
     .summary-box b {
       display: block;
-      margin-top: 6px;
+      margin-top: 8px;
       font-size: 24px;
+      line-height: 1.1;
     }
 
     .table-card {
@@ -320,10 +362,11 @@
     table {
       width: 100%;
       border-collapse: collapse;
-      min-width: 980px;
+      min-width: 1040px;
     }
 
-    th, td {
+    th,
+    td {
       padding: 10px;
       border-top: 1px solid #eee6d7;
       text-align: left;
@@ -337,11 +380,17 @@
       color: white;
       z-index: 1;
       font-size: 13px;
-      letter-spacing: .02em;
+      letter-spacing: 0.02em;
     }
 
-    tr:nth-child(even) td { background: #fcfaf5; }
-    tr.teacher td { background: #eef8f5; font-weight: 700; }
+    tr:nth-child(even) td {
+      background: #fcfaf5;
+    }
+
+    tr.teacher td {
+      background: #eef8f5;
+      font-weight: 700;
+    }
 
     .students-view {
       display: grid;
@@ -373,7 +422,7 @@
       border: 1px solid var(--line);
       border-radius: 14px;
       padding: 10px 12px;
-      background: rgba(255,255,255,.74);
+      background: rgba(255, 255, 255, 0.78);
     }
 
     .empty {
@@ -381,7 +430,7 @@
       border: 1px dashed var(--line);
       border-radius: 18px;
       color: var(--muted);
-      background: rgba(255,255,255,.55);
+      background: rgba(255, 255, 255, 0.55);
     }
 
     @media (max-width: 1200px) {
@@ -395,13 +444,17 @@
     }
 
     @media (max-width: 1100px) {
-      .app { grid-template-columns: 1fr; }
+      .app {
+        grid-template-columns: 1fr;
+      }
+
       .sidebar {
         position: static;
         height: auto;
         border-right: 0;
         border-bottom: 1px solid var(--line);
       }
+
       .content {
         padding: 18px;
       }
@@ -440,7 +493,7 @@
         <select id="flowFilter">
           <option value="">All flows</option>
         </select>
-        <input id="studentSearch" type="text" placeholder="Search student by name, surname or email" />
+        <input id="studentSearch" type="text" placeholder="Search student by name, surname or email" style="display:none;" />
       </div>
 
       <section class="hero">
@@ -465,7 +518,7 @@
 
           <section class="chart-card">
             <h3>Parallel Load</h3>
-            <div class="muted" style="margin-top:6px;">How many groups and students run in the same hour slot.</div>
+            <div class="muted" style="margin-top:6px;">Сколько потоков и студентов идёт параллельно в одном временном слоте.</div>
             <div class="chart" id="parallelChart"></div>
           </section>
         </div>
@@ -526,7 +579,7 @@
     const state = {
       data: null,
       product: null,
-      month: null,
+      month: "",
       view: "overview",
       flow: "",
       studentQuery: ""
@@ -569,25 +622,27 @@
       "12": "Декабрь"
     };
 
-    const formatMonth = (key) => {
+    function formatMonth(key) {
       if (!key) return "All months";
       const [year, month] = key.split("-");
       return `${monthNames[month] || month} ${year}`;
-    };
+    }
 
-    const escapeHtml = (value) =>
-      String(value ?? "")
+    function escapeHtml(value) {
+      return String(value ?? "")
         .replaceAll("&", "&amp;")
         .replaceAll("<", "&lt;")
         .replaceAll(">", "&gt;")
         .replaceAll('"', "&quot;");
+    }
 
-    const normalize = (value) =>
-      String(value ?? "")
+    function normalize(value) {
+      return String(value ?? "")
         .toLowerCase()
         .normalize("NFD")
         .replace(/[\u0300-\u036f]/g, "")
         .trim();
+    }
 
     function getProductData() {
       return state.data.products[state.product];
@@ -614,9 +669,10 @@
       nodes.productList.querySelectorAll("[data-product]").forEach((el) => {
         el.addEventListener("click", () => {
           state.product = el.dataset.product;
-          const months = getProductData().months;
-          state.month = months.length ? months[0].month_key : null;
+          state.month = "";
           state.flow = "";
+          state.studentQuery = "";
+          nodes.studentSearch.value = "";
           render();
         });
       });
@@ -626,7 +682,7 @@
       const product = getProductData();
       const monthItems = [
         { month_key: "", lesson_count: product.lesson_count, flow_count: product.flow_count }
-      ].concat(product.months);
+      ].concat(product.months || []);
 
       nodes.monthList.innerHTML = monthItems.map((month) => `
         <div class="button ${month.month_key === state.month ? "active" : ""}" data-month="${month.month_key}">
@@ -647,7 +703,11 @@
       const flows = getProductData().all_flows || [];
       nodes.flowFilter.innerHTML = `
         <option value="">All flows</option>
-        ${flows.map((flow) => `<option value="${escapeHtml(flow)}" ${state.flow === flow ? "selected" : ""}>${escapeHtml(flow)}</option>`).join("")}
+        ${flows.map((flow) => `
+          <option value="${escapeHtml(flow)}" ${state.flow === flow ? "selected" : ""}>
+            ${escapeHtml(flow)}
+          </option>
+        `).join("")}
       `;
     }
 
@@ -657,17 +717,26 @@
       const teacherCount = new Set(lessons.map((lesson) => lesson.teacher)).size;
       const maxStudents = lessons.reduce((max, lesson) => Math.max(max, Number(lesson.student_count || 0)), 0);
 
-      nodes.heroTitle.textContent = `${state.product} Dashboard${state.month ? " • " + formatMonth(state.month) : ""}${state.flow ? " • " + state.flow : ""}`;
-      nodes.heroDescription.textContent = "Можно смотреть уроки, payroll, одного ученика и общую параллельную нагрузку.";
+      nodes.heroTitle.textContent =
+        `${state.product} Dashboard` +
+        `${state.month ? " • " + formatMonth(state.month) : ""}` +
+        `${state.flow ? " • " + state.flow : ""}`;
+
+      nodes.heroDescription.textContent =
+        state.view === "students"
+          ? "Поиск по ученикам и просмотр attendance по каждому студенту или по целому потоку."
+          : "Можно смотреть уроки, attendance, payroll и общую параллельную нагрузку.";
 
       nodes.statsGrid.innerHTML = [
         ["Lessons", lessons.length],
         ["Flows", flowCount],
         ["Teachers", teacherCount],
         ["Peak students", maxStudents]
-      ].map(([label, value]) => `<div class="stat">${label}<b>${value}</b></div>`).join("");
+      ].map(([label, value]) => `
+        <div class="stat">${label}<b>${value}</b></div>
+      `).join("");
 
-      nodes.monthStrip.innerHTML = getProductData().months.map((month) => `
+      nodes.monthStrip.innerHTML = (getProductData().months || []).map((month) => `
         <div class="month-pill">
           <small style="display:block;opacity:.8;">Month</small>
           <strong>${formatMonth(month.month_key)}</strong>
@@ -681,45 +750,76 @@
       const flows = {};
 
       lessons.forEach((lesson) => {
-        if (!flows[lesson.flow]) flows[lesson.flow] = [];
+        if (!flows[lesson.flow]) {
+          flows[lesson.flow] = [];
+        }
         flows[lesson.flow].push(lesson);
       });
 
       const sortedFlows = Object.entries(flows).sort((a, b) => b[1].length - a[1].length);
 
-      nodes.flowList.innerHTML = sortedFlows.length ? sortedFlows.map(([flow, flowLessons]) => {
-        const peak = flowLessons.reduce((max, lesson) => Math.max(max, Number(lesson.student_count || 0)), 0);
-        const teachers = new Set(flowLessons.map((lesson) => lesson.teacher)).size;
-        return `
-          <div class="flow-item">
-            <strong>${escapeHtml(flow)}</strong>
-            <div class="muted">${flowLessons.length} lessons • ${peak} peak students • ${teachers} teachers</div>
-          </div>
-        `;
-      }).join("") : '<div class="empty">No lessons for this selection yet.</div>';
+      nodes.flowList.innerHTML = sortedFlows.length
+        ? sortedFlows.map(([flow, flowLessons]) => {
+            const peak = flowLessons.reduce((max, lesson) => Math.max(max, Number(lesson.student_count || 0)), 0);
+            const teachers = new Set(flowLessons.map((lesson) => lesson.teacher)).size;
+            return `
+              <div class="flow-item">
+                <strong>${escapeHtml(flow)}</strong>
+                <div class="muted">${flowLessons.length} lessons • ${peak} peak students • ${teachers} teachers</div>
+              </div>
+            `;
+          }).join("")
+        : '<div class="empty">No lessons for this selection yet.</div>';
 
-      const load = {};
-      lessons.forEach((lesson) => {
-        const hour = lesson.start_hour || "unknown";
-        if (!load[hour]) {
-          load[hour] = { hour, groups: 0, students: 0 };
-        }
-        load[hour].groups += 1;
-        load[hour].students += Number(lesson.student_count || 0);
+      const product = getProductData();
+      const chartSource = (product.parallel_load || []).filter((row) => {
+        if (!state.flow && !state.month) return true;
+
+        const relatedLessons = (product.lessons || []).filter((lesson) => {
+          const monthOk = !state.month || lesson.month_key === state.month;
+          const flowOk = !state.flow || lesson.flow === state.flow;
+          return monthOk && flowOk;
+        });
+
+        const perHour = {};
+        relatedLessons.forEach((lesson) => {
+          const start = lesson.lesson_start;
+          const end = lesson.lesson_end;
+          if (!start || !end) return;
+
+          const [startHour] = start.split(":");
+          const [endHour] = end.split(":");
+          let hour = Number(startHour);
+          const finish = Number(endHour);
+
+          while (hour <= finish) {
+            const slot = String(hour).padStart(2, "0") + ":00";
+            if (!perHour[slot]) {
+              perHour[slot] = { groups: new Set(), students: 0 };
+            }
+            perHour[slot].groups.add(lesson.flow);
+            perHour[slot].students += Number(lesson.student_count || 0);
+            hour += 1;
+          }
+        });
+
+        return Boolean(perHour[row.hour]);
       });
 
-      const rows = Object.values(load).sort((a, b) => a.hour.localeCompare(b.hour));
-      const maxGroups = Math.max(...rows.map((r) => r.groups), 1);
+      const rows = chartSource.length ? chartSource : [];
+      const maxGroups = Math.max(...rows.map((r) => Number(r.groups || 0)), 1);
 
-      nodes.parallelChart.innerHTML = rows.length ? rows.map((row) => `
-        <div class="chart-row">
-          <strong>${row.hour}</strong>
-          <div class="bar-wrap">
-            <div class="bar" style="width:${(row.groups / maxGroups) * 100}%"></div>
-          </div>
-          <span class="muted">${row.groups} groups • ${row.students} students</span>
-        </div>
-      `).join("") : '<div class="empty">No parallel load data.</div>';
+      nodes.parallelChart.innerHTML = rows.length
+        ? rows.map((row) => `
+            <div class="chart-row">
+              <strong>${escapeHtml(row.hour)}</strong>
+              <div class="bar-wrap">
+                <div class="bar" style="width:${(Number(row.groups || 0) / maxGroups) * 100}%"></div>
+              </div>
+              <span class="muted">${Number(row.groups || 0)} groups • ${Number(row.students || 0)} students</span>
+            </div>
+          `).join("")
+        : '<div class="empty">No parallel load data for this selection.</div>';
     }
 
     function lessonTags(lesson) {
@@ -740,118 +840,139 @@
     function renderLessons() {
       const lessons = getLessons();
 
-      nodes.lessonList.innerHTML = lessons.length ? lessons.map((lesson, index) => `
-        <details class="lesson" ${index === 0 ? "open" : ""}>
-          <summary>
-            <div class="lesson-head">
-              <div>
-                <h3>${escapeHtml(lesson.flow)} • ${escapeHtml(lesson.meeting_date)}</h3>
-                <div class="muted">Teacher: ${escapeHtml(lesson.teacher)} • ${escapeHtml(lesson.meeting_name)}</div>
+      nodes.lessonList.innerHTML = lessons.length
+        ? lessons.map((lesson, index) => `
+            <details class="lesson" ${index === 0 ? "open" : ""}>
+              <summary>
+                <div class="lesson-head">
+                  <div>
+                    <h3>${escapeHtml(lesson.flow)} • ${escapeHtml(lesson.meeting_date)}</h3>
+                    <div class="muted">
+                      Teacher: ${escapeHtml(lesson.teacher)} • ${escapeHtml(lesson.meeting_name)}
+                      • ${escapeHtml(lesson.lesson_start || "--:--")} - ${escapeHtml(lesson.lesson_end || "--:--")}
+                    </div>
+                  </div>
+                  <div class="lesson-tags">${lessonTags(lesson)}</div>
+                </div>
+              </summary>
+
+              <div class="lesson-body">
+                <div class="summary-grid">
+                  <div class="summary-box">Students<b>${lesson.student_count}</b></div>
+                  <div class="summary-box">Moderators<b>${lesson.moderator_count}</b></div>
+                  <div class="summary-box">Full lesson<b>${lesson.status_counts?.["Full lesson"] || 0}</b></div>
+                  <div class="summary-box">Late<b>${(lesson.status_counts?.["Late"] || 0) + (lesson.status_counts?.["Late + Left early"] || 0)}</b></div>
+                  <div class="summary-box">Left early<b>${(lesson.status_counts?.["Left early"] || 0) + (lesson.status_counts?.["Late + Left early"] || 0)}</b></div>
+                </div>
+
+                <div class="table-card">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Duration</th>
+                        <th>Activity</th>
+                        <th>Talk</th>
+                        <th>Webcam</th>
+                        <th>Messages</th>
+                        <th>Join</th>
+                        <th>Left</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${lesson.rows.map((row) => `
+                        <tr class="${row.role === "Moderator" ? "teacher" : ""}">
+                          <td>${escapeHtml(row.name)}</td>
+                          <td>${escapeHtml(row.email || "")}</td>
+                          <td>${escapeHtml(row.role)}</td>
+                          <td>${escapeHtml(row.duration)}</td>
+                          <td>${escapeHtml(row.activity_score)}</td>
+                          <td>${escapeHtml(row.talk_time)}</td>
+                          <td>${escapeHtml(row.webcam_time)}</td>
+                          <td>${escapeHtml(row.messages)}</td>
+                          <td>${escapeHtml(row.join)}</td>
+                          <td>${escapeHtml(row.left)}</td>
+                          <td>${escapeHtml(row.status)}</td>
+                        </tr>
+                      `).join("")}
+                    </tbody>
+                  </table>
+                </div>
               </div>
-              <div class="lesson-tags">${lessonTags(lesson)}</div>
-            </div>
-          </summary>
-
-          <div class="lesson-body">
-            <div class="summary-grid">
-              <div class="summary-box">Students<b>${lesson.student_count}</b></div>
-              <div class="summary-box">Moderators<b>${lesson.moderator_count}</b></div>
-              <div class="summary-box">Full lesson<b>${lesson.status_counts?.["Full lesson"] || 0}</b></div>
-              <div class="summary-box">Late<b>${(lesson.status_counts?.["Late"] || 0) + (lesson.status_counts?.["Late + Left early"] || 0)}</b></div>
-              <div class="summary-box">Left early<b>${(lesson.status_counts?.["Left early"] || 0) + (lesson.status_counts?.["Late + Left early"] || 0)}</b></div>
-            </div>
-
-            <div class="table-card">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Role</th>
-                    <th>Duration</th>
-                    <th>Activity</th>
-                    <th>Talk</th>
-                    <th>Webcam</th>
-                    <th>Messages</th>
-                    <th>Join</th>
-                    <th>Left</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${lesson.rows.map((row) => `
-                    <tr class="${row.role === "Moderator" ? "teacher" : ""}">
-                      <td>${escapeHtml(row.name)}</td>
-                      <td>${escapeHtml(row.email || "")}</td>
-                      <td>${escapeHtml(row.role)}</td>
-                      <td>${escapeHtml(row.duration)}</td>
-                      <td>${escapeHtml(row.activity_score)}</td>
-                      <td>${escapeHtml(row.talk_time)}</td>
-                      <td>${escapeHtml(row.webcam_time)}</td>
-                      <td>${escapeHtml(row.messages)}</td>
-                      <td>${escapeHtml(row.join)}</td>
-                      <td>${escapeHtml(row.left)}</td>
-                      <td>${escapeHtml(row.status)}</td>
-                    </tr>
-                  `).join("")}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </details>
-      `).join("") : '<div class="empty">No lessons for this selection yet.</div>';
+            </details>
+          `).join("")
+        : '<div class="empty">No lessons for this selection yet.</div>';
     }
 
     function renderPayroll() {
       const product = getProductData();
 
-      const byGroup = product.payroll_by_group.filter((row) => {
+      const byGroup = (product.payroll_by_group || []).filter((row) => {
         const monthOk = !state.month || row.month_key === state.month;
         const flowOk = !state.flow || row.group === state.flow;
         return monthOk && flowOk;
       });
 
-      const byTeacher = product.payroll_by_teacher.filter((row) => !state.month || row.month_key === state.month);
+      const byTeacher = (product.payroll_by_teacher || []).filter((row) => {
+        const monthOk = !state.month || row.month_key === state.month;
+        return monthOk;
+      });
 
-      nodes.payrollGroupBody.innerHTML = byGroup.length ? byGroup.map((row) => `
-        <tr>
-          <td>${escapeHtml(row.group)}</td>
-          <td>${escapeHtml(row.main_teacher)}</td>
-          <td>${row.main_lessons}</td>
-          <td>${escapeHtml(row.replacement_teacher)}</td>
-          <td>${row.replacement_lessons}</td>
-          <td>${escapeHtml(row.replacement_dates)}</td>
-          <td>${row.total_lessons}</td>
-        </tr>
-      `).join("") : '<tr><td colspan="7">No payroll data yet.</td></tr>';
+      nodes.payrollGroupBody.innerHTML = byGroup.length
+        ? byGroup.map((row) => `
+            <tr>
+              <td>${escapeHtml(row.group)}</td>
+              <td>${escapeHtml(row.main_teacher)}</td>
+              <td>${row.main_lessons}</td>
+              <td>${escapeHtml(row.replacement_teacher)}</td>
+              <td>${row.replacement_lessons}</td>
+              <td>${escapeHtml(row.replacement_dates)}</td>
+              <td>${row.total_lessons}</td>
+            </tr>
+          `).join("")
+        : '<tr><td colspan="7">No payroll data yet.</td></tr>';
 
-      nodes.payrollTeacherBody.innerHTML = byTeacher.length ? byTeacher.map((row) => `
-        <tr>
-          <td>${escapeHtml(row.teacher)}</td>
-          <td>${row.total_lessons}</td>
-          <td>${row.main_lessons}</td>
-          <td>${row.replacement_lessons}</td>
-          <td>${escapeHtml(row.groups)}</td>
-          <td>${escapeHtml(row.replacement_dates)}</td>
-        </tr>
-      `).join("") : '<tr><td colspan="6">No payroll data yet.</td></tr>';
+      nodes.payrollTeacherBody.innerHTML = byTeacher.length
+        ? byTeacher.map((row) => `
+            <tr>
+              <td>${escapeHtml(row.teacher)}</td>
+              <td>${row.total_lessons}</td>
+              <td>${row.main_lessons}</td>
+              <td>${row.replacement_lessons}</td>
+              <td>${escapeHtml(row.groups)}</td>
+              <td>${escapeHtml(row.replacement_dates)}</td>
+            </tr>
+          `).join("")
+        : '<tr><td colspan="6">No payroll data yet.</td></tr>';
     }
 
     function buildStudentSearchResults() {
       const query = normalize(state.studentQuery);
-      if (!query || query.length < 2) {
-        return [];
-      }
-
+      const selectedFlow = state.flow;
       const results = {};
 
       Object.entries(state.data.products).forEach(([productKey, product]) => {
-        product.lessons.forEach((lesson) => {
-          lesson.rows.forEach((row) => {
+        if (productKey !== state.product) return;
+
+        (product.lessons || []).forEach((lesson) => {
+          if (selectedFlow && lesson.flow !== selectedFlow) return;
+          if (state.month && lesson.month_key !== state.month) return;
+
+          (lesson.rows || []).forEach((row) => {
             if (row.role !== "Student") return;
 
             const haystack = normalize(`${row.name} ${row.email || ""}`);
-            if (!haystack.includes(query)) return;
+
+            if (query && query.length >= 2 && !haystack.includes(query)) {
+              return;
+            }
+
+            if (!query && !selectedFlow) {
+              return;
+            }
 
             const key = `${normalize(row.name)}|${normalize(row.email || "")}`;
             if (!results[key]) {
@@ -861,7 +982,7 @@
                 lessons: [],
                 months: new Set(),
                 flows: new Set(),
-                statuses: {},
+                statuses: {}
               };
             }
 
@@ -874,7 +995,7 @@
               status: row.status,
               duration: row.duration,
               join: row.join,
-              left: row.left,
+              left: row.left
             });
 
             results[key].months.add(lesson.month_key);
@@ -890,7 +1011,7 @@
           monthCount: student.months.size,
           flowCount: student.flows.size,
           lessonCount: student.lessons.length,
-          lessons: student.lessons.sort((a, b) => b.meeting_date.localeCompare(a.meeting_date)),
+          lessons: student.lessons.sort((a, b) => b.meeting_date.localeCompare(a.meeting_date))
         }))
         .sort((a, b) => b.lessonCount - a.lessonCount);
     }
@@ -898,37 +1019,45 @@
     function renderStudents() {
       const results = buildStudentSearchResults();
 
-      if (!state.studentQuery || state.studentQuery.trim().length < 2) {
-        nodes.studentsList.innerHTML = '<div class="empty">Type at least 2 characters to search by name, surname or email.</div>';
+      if ((!state.studentQuery || state.studentQuery.trim().length < 2) && !state.flow) {
+        nodes.studentsList.innerHTML =
+          '<div class="empty">Type at least 2 characters to search, or choose a flow to see all students in that flow.</div>';
         return;
       }
 
-      nodes.studentsList.innerHTML = results.length ? results.map((student) => `
-        <div class="student-card">
-          <h3>${escapeHtml(student.name)}</h3>
-          <div class="muted">${escapeHtml(student.email || "No email in source data")}</div>
+      nodes.studentsList.innerHTML = results.length
+        ? results.map((student) => `
+            <div class="student-card">
+              <h3>${escapeHtml(student.name)}</h3>
+              <div class="muted">${escapeHtml(student.email || "No email in source data")}</div>
 
-          <div class="student-meta">
-            <span class="tag">${student.lessonCount} lessons</span>
-            <span class="tag good">${student.monthCount} months</span>
-            <span class="tag warn">${student.flowCount} flows</span>
-          </div>
-
-          <div class="student-meta" style="margin-top:12px;">
-            ${Object.entries(student.statuses).map(([status, count]) => `<span class="tag">${escapeHtml(status)}: ${count}</span>`).join("")}
-          </div>
-
-          <div class="student-lessons">
-            ${student.lessons.map((lesson) => `
-              <div class="student-lesson-row">
-                <strong>${escapeHtml(lesson.product)} • ${escapeHtml(lesson.flow)}</strong>
-                <div class="muted">${escapeHtml(lesson.meeting_date)} • Teacher: ${escapeHtml(lesson.teacher)}</div>
-                <div class="muted">Status: ${escapeHtml(lesson.status)} • Duration: ${escapeHtml(lesson.duration)} • Join: ${escapeHtml(lesson.join)} • Left: ${escapeHtml(lesson.left)}</div>
+              <div class="student-meta">
+                <span class="tag">${student.lessonCount} lessons</span>
+                <span class="tag good">${student.monthCount} months</span>
+                <span class="tag warn">${student.flowCount} flows</span>
               </div>
-            `).join("")}
-          </div>
-        </div>
-      `).join("") : '<div class="empty">No students found for this query.</div>';
+
+              <div class="student-meta" style="margin-top:12px;">
+                ${Object.entries(student.statuses).map(([status, count]) => `
+                  <span class="tag">${escapeHtml(status)}: ${count}</span>
+                `).join("")}
+              </div>
+
+              <div class="student-lessons">
+                ${student.lessons.map((lesson) => `
+                  <div class="student-lesson-row">
+                    <strong>${escapeHtml(lesson.product)} • ${escapeHtml(lesson.flow)}</strong>
+                    <div class="muted">${escapeHtml(lesson.meeting_date)} • Teacher: ${escapeHtml(lesson.teacher)}</div>
+                    <div class="muted">
+                      Status: ${escapeHtml(lesson.status)} • Duration: ${escapeHtml(lesson.duration)}
+                      • Join: ${escapeHtml(lesson.join)} • Left: ${escapeHtml(lesson.left)}
+                    </div>
+                  </div>
+                `).join("")}
+              </div>
+            </div>
+          `).join("")
+        : '<div class="empty">No students found for this selection.</div>';
     }
 
     function renderView() {
@@ -936,6 +1065,8 @@
       nodes.lessonsView.style.display = state.view === "lessons" ? "" : "none";
       nodes.payrollView.style.display = state.view === "payroll" ? "" : "none";
       nodes.studentsView.style.display = state.view === "students" ? "" : "none";
+
+      nodes.studentSearch.style.display = state.view === "students" ? "" : "none";
 
       document.querySelectorAll("[data-view]").forEach((button) => {
         button.classList.toggle("active", button.dataset.view === state.view);
@@ -958,6 +1089,9 @@
       button.addEventListener("click", () => {
         state.view = button.dataset.view;
         renderView();
+        if (state.view === "students") {
+          renderStudents();
+        }
       });
     });
 
@@ -987,8 +1121,9 @@
         if (!products.length) {
           throw new Error("dashboard_data.json загружен, но products пустой");
         }
+
         state.product = products[0];
-        state.month = data.products[state.product]?.months?.[0]?.month_key || "";
+        state.month = "";
         nodes.generatedAt.textContent = `Updated: ${data.generated_at} (${data.timezone})`;
         render();
       })
