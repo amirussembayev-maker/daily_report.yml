@@ -87,7 +87,7 @@
     }
 
     .hero {
-      padding: 56px 0 28px;
+      padding: 52px 0 28px;
       text-align: center;
     }
 
@@ -108,7 +108,7 @@
 
     .hero-copy {
       margin: 18px auto 0;
-      max-width: 840px;
+      max-width: 860px;
       font-size: clamp(20px, 2.4vw, 30px);
       line-height: 1.2;
       letter-spacing: -0.03em;
@@ -189,20 +189,6 @@
       gap: 18px;
     }
 
-    .identity-grid {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 18px;
-      text-align: left;
-    }
-
-    .identity-card {
-      padding: 18px 18px 20px;
-      border-radius: 22px;
-      background: rgba(255,255,255,0.86);
-      border: 1px solid rgba(0,0,0,0.05);
-    }
-
     .hero-chip-row {
       display: flex;
       gap: 10px;
@@ -217,6 +203,20 @@
       color: var(--accent);
       font-weight: 700;
       font-size: 13px;
+    }
+
+    .identity-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 18px;
+      text-align: left;
+    }
+
+    .identity-card {
+      padding: 18px 18px 20px;
+      border-radius: 22px;
+      background: rgba(255,255,255,0.86);
+      border: 1px solid rgba(0,0,0,0.05);
     }
 
     .label {
@@ -236,17 +236,9 @@
       font-weight: 700;
     }
 
-    .toolbar {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      justify-content: center;
-      margin-bottom: 20px;
-    }
-
     .filter-grid {
       display: grid;
-      grid-template-columns: minmax(220px, 280px) 1fr;
+      grid-template-columns: minmax(180px, 220px) minmax(180px, 220px) 1fr;
       gap: 18px;
       margin-bottom: 22px;
     }
@@ -297,7 +289,7 @@
       text-align: left;
     }
 
-    .kpi-card .kpi-top {
+    .kpi-top {
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -305,22 +297,36 @@
       margin-bottom: 14px;
     }
 
-    .kpi-card .kpi-value {
+    .kpi-value {
       font-size: clamp(30px, 4vw, 42px);
       letter-spacing: -0.04em;
       font-weight: 800;
       line-height: 1;
     }
 
-    .kpi-card .kpi-sub {
+    .kpi-sub {
       color: var(--muted);
       font-size: 14px;
       line-height: 1.45;
     }
 
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 68px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-weight: 700;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
     .content-grid {
       display: grid;
-      grid-template-columns: 1.1fr 0.9fr;
+      grid-template-columns: 1.05fr 0.95fr;
       gap: 18px;
     }
 
@@ -351,20 +357,6 @@
       margin-top: 6px;
     }
 
-    .pill {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-width: 68px;
-      padding: 8px 12px;
-      border-radius: 999px;
-      background: var(--accent-soft);
-      color: var(--accent);
-      font-weight: 700;
-      font-size: 13px;
-      white-space: nowrap;
-    }
-
     .months-row,
     .flow-list,
     .students-view,
@@ -388,8 +380,8 @@
       letter-spacing: -0.03em;
     }
 
-    .flow-card .muted,
     .month-card .muted,
+    .flow-card .muted,
     .student-card .muted {
       margin-top: 6px;
     }
@@ -560,10 +552,22 @@
       background: rgba(250, 250, 252, 0.6);
     }
 
-    .student-lessons {
-      margin-top: 14px;
+    .student-card {
       display: grid;
-      gap: 8px;
+      gap: 14px;
+    }
+
+    .student-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+
+    .student-lessons {
+      display: grid;
+      gap: 10px;
     }
 
     .student-lesson-row {
@@ -571,6 +575,25 @@
       border-radius: 20px;
       padding: 12px 14px;
       background: rgba(255,255,255,0.84);
+      display: grid;
+      gap: 6px;
+    }
+
+    .student-lesson-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+
+    .student-lesson-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.4;
     }
 
     .empty {
@@ -585,17 +608,21 @@
       display: none !important;
     }
 
-    @media (max-width: 1100px) {
-      .identity-grid,
-      .stat-strip,
-      .summary-grid,
-      .filter-grid,
-      .content-grid,
+    @media (max-width: 1200px) {
       .premium-kpis {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .content-grid {
         grid-template-columns: 1fr;
       }
 
-      .panel-head,
+      .summary-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 900px) {
       .topbar-inner {
         flex-direction: column;
         align-items: flex-start;
@@ -603,6 +630,180 @@
 
       .top-meta {
         justify-content: flex-start;
+        gap: 10px;
+      }
+
+      .hero {
+        padding: 38px 0 20px;
+      }
+
+      h1 {
+        font-size: clamp(34px, 8vw, 52px);
+        line-height: 1.02;
+      }
+
+      .hero-copy {
+        font-size: clamp(18px, 4vw, 24px);
+        max-width: 100%;
+      }
+
+      .hero-actions {
+        gap: 10px;
+      }
+
+      .btn {
+        min-width: 0;
+        flex: 1 1 calc(50% - 10px);
+        padding: 12px 14px;
+      }
+
+      .identity-grid,
+      .premium-kpis,
+      .stat-strip,
+      .filter-grid,
+      .summary-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .panel-head,
+      .lesson-head,
+      .student-header {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .lesson-head > div:first-child {
+        min-width: 0;
+      }
+
+      .chart-row {
+        grid-template-columns: 64px 1fr;
+      }
+
+      .chart-row span {
+        grid-column: 1 / -1;
+      }
+
+      table {
+        min-width: 860px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .topbar-inner,
+      .hero,
+      .page {
+        width: min(100%, calc(100% - 20px));
+      }
+
+      .hero {
+        padding: 28px 0 16px;
+      }
+
+      h1 {
+        font-size: clamp(30px, 10vw, 42px);
+      }
+
+      .hero-copy {
+        font-size: 17px;
+        line-height: 1.35;
+      }
+
+      .hero-actions {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .btn {
+        width: 100%;
+        flex: 1 1 auto;
+      }
+
+      .hero-chip-row {
+        justify-content: flex-start;
+      }
+
+      .hero-chip {
+        font-size: 12px;
+      }
+
+      .value,
+      .summary-box b,
+      .kpi-value {
+        font-size: 24px;
+      }
+
+      .panel h2,
+      .chart-card h2 {
+        font-size: 24px;
+      }
+
+      .summary-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .lesson-head h3 {
+        font-size: 22px;
+      }
+
+      .month-card strong,
+      .flow-card strong,
+      .student-card strong {
+        font-size: 18px;
+      }
+
+      .student-lesson-top {
+        flex-direction: column;
+      }
+
+      .chart-row {
+        grid-template-columns: 1fr;
+      }
+
+      .bar-wrap {
+        width: 100%;
+      }
+
+      table {
+        min-width: 760px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .topbar-inner,
+      .hero,
+      .page {
+        width: min(100%, calc(100% - 16px));
+      }
+
+      .hero-panel,
+      .panel,
+      .chart-card,
+      .filter-card {
+        border-radius: 22px;
+      }
+
+      .identity-card,
+      .month-card,
+      .flow-card,
+      .student-card,
+      .kpi-card,
+      .stat-card,
+      .summary-box {
+        border-radius: 18px;
+      }
+
+      .panel,
+      .chart-card,
+      .hero-panel,
+      .filter-card {
+        padding: 14px;
+      }
+
+      .lesson summary,
+      .lesson-body {
+        padding-left: 14px;
+        padding-right: 14px;
       }
     }
   </style>
@@ -656,6 +857,11 @@
 
   <main class="page">
     <div class="filter-grid">
+      <div class="filter-card">
+        <span class="label">Product</span>
+        <select id="productFilter"></select>
+      </div>
+
       <div class="filter-card">
         <span class="label">Flow filter</span>
         <select id="flowFilter">
@@ -794,11 +1000,12 @@
       identityMonth: document.getElementById("identityMonth"),
       identityFlow: document.getElementById("identityFlow"),
       identityUpdated: document.getElementById("identityUpdated"),
-      statsGrid: document.getElementById("statsGrid"),
-      premiumKpis: document.getElementById("premiumKpis"),
+      productFilter: document.getElementById("productFilter"),
       flowFilter: document.getElementById("flowFilter"),
       studentSearchCard: document.getElementById("studentSearchCard"),
       studentSearch: document.getElementById("studentSearch"),
+      statsGrid: document.getElementById("statsGrid"),
+      premiumKpis: document.getElementById("premiumKpis"),
       overviewView: document.getElementById("overviewView"),
       lessonsView: document.getElementById("lessonsView"),
       payrollView: document.getElementById("payrollView"),
@@ -853,6 +1060,10 @@
       return `${monthNames[month] || month} ${year}`;
     }
 
+    function getProductKeys() {
+      return Object.keys(state.data?.products || {});
+    }
+
     function getProductData() {
       return state.data.products[state.product];
     }
@@ -898,6 +1109,15 @@
         .sort((a, b) => a.hour.localeCompare(b.hour));
     }
 
+    function renderProductFilter() {
+      const products = getProductKeys();
+      nodes.productFilter.innerHTML = products.map((product) => `
+        <option value="${escapeHtml(product)}" ${product === state.product ? "selected" : ""}>
+          ${escapeHtml(product)}
+        </option>
+      `).join("");
+    }
+
     function renderFlowFilter() {
       const flows = getProductData().all_flows || [];
       nodes.flowFilter.innerHTML = `
@@ -925,8 +1145,8 @@
       nodes.heroTitle.textContent = `${state.product} Attendance Dashboard`;
       nodes.heroDescription.textContent =
         state.view === "students"
-          ? "Ищем одного ученика или открываем полную attendance-ленту по выбранному потоку."
-          : "Уроки, payroll, потоки, ученики и параллельная нагрузка в одном аккуратном отчёте.";
+          ? "Ищем одного ученика или открываем attendance по выбранному потоку."
+          : "Уроки, payroll, потоки, ученики и параллельная нагрузка в одном отчёте.";
 
       nodes.heroChipRow.innerHTML = [
         state.product,
@@ -974,17 +1194,17 @@
         {
           label: "Full attendance rate",
           value: `${attendanceRate}%`,
-          sub: "Доля студентов, которые отсидели полный урок без late/left early."
+          sub: "Доля студентов, которые отсидели полный урок."
         },
         {
           label: "Average students / lesson",
           value: avgStudents,
-          sub: "Среднее количество студентов на урок по текущему фильтру."
+          sub: "Среднее количество студентов на урок."
         },
         {
           label: "Late / left early",
           value: `${statusTotals.late}/${statusTotals.leftEarly}`,
-          sub: "Сводный сигнал по опозданиям и ранним выходам."
+          sub: "Сводка по опозданиям и ранним выходам."
         },
         {
           label: "Busiest slot",
@@ -1283,16 +1503,20 @@
       nodes.studentsList.innerHTML = results.length
         ? results.map((student) => `
           <div class="student-card">
-            <strong>${escapeHtml(student.name)}</strong>
-            <div class="muted">${escapeHtml(student.email || "No email in source data")}</div>
+            <div class="student-header">
+              <div>
+                <strong>${escapeHtml(student.name)}</strong>
+                <div class="muted">${escapeHtml(student.email || "No email in source data")}</div>
+              </div>
 
-            <div class="student-meta" style="margin-top:12px;">
-              <span class="tag">${student.lessonCount} lessons</span>
-              <span class="tag good">${student.monthCount} months</span>
-              <span class="tag warn">${student.flowCount} flows</span>
+              <div class="student-meta">
+                <span class="tag">${student.lessonCount} lessons</span>
+                <span class="tag good">${student.monthCount} months</span>
+                <span class="tag warn">${student.flowCount} flows</span>
+              </div>
             </div>
 
-            <div class="student-meta" style="margin-top:12px;">
+            <div class="student-meta">
               ${Object.entries(student.statuses).map(([status, count]) => `
                 <span class="tag">${escapeHtml(status)}: ${count}</span>
               `).join("")}
@@ -1301,9 +1525,19 @@
             <div class="student-lessons">
               ${student.lessons.map((lesson) => `
                 <div class="student-lesson-row">
-                  <strong>${escapeHtml(lesson.product)} • ${escapeHtml(lesson.flow)}</strong>
-                  <div class="muted">${escapeHtml(lesson.meeting_date)} • Teacher: ${escapeHtml(lesson.teacher)}</div>
-                  <div class="muted">Status: ${escapeHtml(lesson.status)} • Duration: ${escapeHtml(lesson.duration)} • Join: ${escapeHtml(lesson.join)} • Left: ${escapeHtml(lesson.left)}</div>
+                  <div class="student-lesson-top">
+                    <strong>${escapeHtml(lesson.flow)}</strong>
+                    <span class="tag">${escapeHtml(lesson.status)}</span>
+                  </div>
+                  <div class="student-lesson-meta">
+                    <span>${escapeHtml(lesson.meeting_date)}</span>
+                    <span>Teacher: ${escapeHtml(lesson.teacher)}</span>
+                  </div>
+                  <div class="student-lesson-meta">
+                    <span>Duration: ${escapeHtml(lesson.duration)}</span>
+                    <span>Join: ${escapeHtml(lesson.join)}</span>
+                    <span>Left: ${escapeHtml(lesson.left)}</span>
+                  </div>
                 </div>
               `).join("")}
             </div>
@@ -1327,6 +1561,7 @@
     }
 
     function render() {
+      renderProductFilter();
       renderFlowFilter();
       renderHeader();
       renderMonths();
@@ -1346,6 +1581,15 @@
           renderStudents();
         }
       });
+    });
+
+    nodes.productFilter.addEventListener("change", (event) => {
+      state.product = event.target.value;
+      state.month = "";
+      state.flow = "";
+      state.studentQuery = "";
+      nodes.studentSearch.value = "";
+      render();
     });
 
     nodes.flowFilter.addEventListener("change", (event) => {
@@ -1375,7 +1619,6 @@
           throw new Error("dashboard_data.json загружен, но products пустой");
         }
         state.product = products[0];
-        state.month = "";
         render();
       })
       .catch((error) => {
@@ -1383,9 +1626,6 @@
         nodes.heroTitle.textContent = "Loading failed";
         nodes.heroDescription.textContent = error.message;
         nodes.overviewView.innerHTML = `<div class="empty">${escapeHtml(error.message)}</div>`;
-        nodes.lessonsView.innerHTML = "";
-        nodes.payrollView.innerHTML = "";
-        nodes.studentsView.innerHTML = "";
       });
   </script>
 </body>
