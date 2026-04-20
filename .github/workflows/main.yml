@@ -69,6 +69,7 @@ jobs:
           GOOGLE_SHEET_RTN: ${{ secrets.GOOGLE_SHEET_RTN }}
           GOOGLE_SHEET_VIP: ${{ secrets.GOOGLE_SHEET_VIP }}
           GOOGLE_SHEET_NUET: ${{ secrets.GOOGLE_SHEET_NUET }}
+          GOOGLE_SHEET_SAT: ${{ secrets.GOOGLE_SHEET_SAT }}
           REPORT_TIMEZONE: Asia/Almaty
           SYNC_MODE: ${{ env.SYNC_MODE }}
           REPORT_START_DATE: ${{ env.REPORT_START_DATE }}
