@@ -38,6 +38,7 @@ PRODUCT_ENV_KEYS = {
     "RTN": "GOOGLE_SHEET_RTN",
     "VIP": "GOOGLE_SHEET_VIP",
     "NUET": "GOOGLE_SHEET_NUET",
+    "SAT": "GOOGLE_SHEET_SAT",
 }
 
 PRODUCT_ALIASES = {
@@ -46,6 +47,7 @@ PRODUCT_ALIASES = {
     "RTN": ["RTN"],
     "VIP": ["VIP"],
     "NUET": ["NUET"],
+    "SAT": ["SAT"],
 }
 
 LESSON_INDEX_COLUMNS = [
