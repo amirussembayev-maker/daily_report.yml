@@ -238,7 +238,7 @@
 
     .filter-grid {
       display: grid;
-      grid-template-columns: minmax(180px, 220px) minmax(180px, 220px) 1fr;
+      grid-template-columns: repeat(4, minmax(180px, 1fr));
       gap: 18px;
       margin-bottom: 22px;
     }
@@ -620,6 +620,10 @@
       .summary-grid {
         grid-template-columns: repeat(3, minmax(0, 1fr));
       }
+
+      .filter-grid {
+        grid-template-columns: repeat(2, minmax(180px, 1fr));
+      }
     }
 
     @media (max-width: 900px) {
@@ -841,7 +845,7 @@
         </div>
         <div class="identity-card">
           <span class="label">Month</span>
-          <div class="value" id="identityMonth">All</div>
+          <div class="value" id="identityMonth">—</div>
         </div>
         <div class="identity-card">
           <span class="label">Flow</span>
@@ -863,13 +867,16 @@
       </div>
 
       <div class="filter-card">
-        <span class="label">Flow filter</span>
-        <select id="flowFilter">
-          <option value="">All flows</option>
-        </select>
+        <span class="label">Month</span>
+        <select id="monthFilter"></select>
       </div>
 
-      <div class="filter-card" id="studentSearchCard" style="display:none;">
+      <div class="filter-card">
+        <span class="label">Flow filter</span>
+        <select id="flowFilter"></select>
+      </div>
+
+      <div class="filter-card hidden" id="studentSearchCard">
         <span class="label">Student search</span>
         <input id="studentSearch" type="text" placeholder="Search student by name, surname or email" />
       </div>
@@ -918,7 +925,7 @@
         <div class="panel-head">
           <div>
             <h2>Payroll by Group</h2>
-            <div class="panel-subtle">Короткие митинги меньше payroll threshold уже не должны сюда попадать.</div>
+            <div class="panel-subtle">Сводка только по выбранному месяцу и фильтру потока.</div>
           </div>
           <div class="pill" id="payrollGroupBadge">0 rows</div>
         </div>
@@ -944,7 +951,7 @@
         <div class="panel-head">
           <div>
             <h2>Payroll by Teacher</h2>
-            <div class="panel-subtle">Сводка по преподавателям за выбранный период.</div>
+            <div class="panel-subtle">Сводка преподавателей за выбранный месяц.</div>
           </div>
           <div class="pill" id="payrollTeacherBadge">0 rows</div>
         </div>
@@ -971,7 +978,7 @@
         <div class="panel-head">
           <div>
             <h2>Student Attendance</h2>
-            <div class="panel-subtle">Поиск по ученику или просмотр всех учеников выбранного потока.</div>
+            <div class="panel-subtle">Поиск по ученику или просмотр всех учеников выбранного потока и месяца.</div>
           </div>
           <div class="pill" id="studentsBadge">0 students</div>
         </div>
@@ -1001,6 +1008,7 @@
       identityFlow: document.getElementById("identityFlow"),
       identityUpdated: document.getElementById("identityUpdated"),
       productFilter: document.getElementById("productFilter"),
+      monthFilter: document.getElementById("monthFilter"),
       flowFilter: document.getElementById("flowFilter"),
       studentSearchCard: document.getElementById("studentSearchCard"),
       studentSearch: document.getElementById("studentSearch"),
@@ -1068,6 +1076,16 @@
       return state.data.products[state.product];
     }
 
+    function getAvailableMonths() {
+      return (getProductData().months || []).map((item) => item.month_key);
+    }
+
+    function getDefaultMonthForProduct(productKey) {
+      const product = state.data.products[productKey];
+      const months = product?.months || [];
+      return months.length ? months[0].month_key : "";
+    }
+
     function getLessons() {
       const product = getProductData();
       if (!product) return [];
@@ -1118,6 +1136,18 @@
       `).join("");
     }
 
+    function renderMonthFilter() {
+      const months = getAvailableMonths();
+      nodes.monthFilter.innerHTML = `
+        ${months.map((month) => `
+          <option value="${escapeHtml(month)}" ${month === state.month ? "selected" : ""}>
+            ${escapeHtml(formatMonth(month))}
+          </option>
+        `).join("")}
+        <option value="" ${state.month === "" ? "selected" : ""}>All months</option>
+      `;
+    }
+
     function renderFlowFilter() {
       const flows = getProductData().all_flows || [];
       nodes.flowFilter.innerHTML = `
@@ -1145,7 +1175,7 @@
       nodes.heroTitle.textContent = `${state.product} Attendance Dashboard`;
       nodes.heroDescription.textContent =
         state.view === "students"
-          ? "Ищем одного ученика или открываем attendance по выбранному потоку."
+          ? "Ищем одного ученика или открываем attendance по выбранному потоку и месяцу."
           : "Уроки, payroll, потоки, ученики и параллельная нагрузка в одном отчёте.";
 
       nodes.heroChipRow.innerHTML = [
@@ -1227,16 +1257,16 @@
 
     function renderMonths() {
       const product = getProductData();
-      const monthItems = [
-        { month_key: "", lesson_count: product.lesson_count, flow_count: product.flow_count }
-      ].concat(product.months || []);
+      const monthItems = product.months || [];
 
-      nodes.monthList.innerHTML = monthItems.map((month) => `
-        <div class="month-card" data-month="${month.month_key}" style="cursor:pointer; border:${month.month_key === state.month ? '1px solid rgba(0,113,227,0.28)' : '1px solid rgba(255,255,255,0.88)'};">
-          <strong>${month.month_key ? formatMonth(month.month_key) : "All months"}</strong>
-          <div class="muted">${month.lesson_count} lessons • ${month.flow_count} flows</div>
-        </div>
-      `).join("");
+      nodes.monthList.innerHTML = monthItems.length
+        ? monthItems.map((month) => `
+          <div class="month-card" data-month="${month.month_key}" style="cursor:pointer; border:${month.month_key === state.month ? '1px solid rgba(0,113,227,0.28)' : '1px solid rgba(255,255,255,0.88)'};">
+            <strong>${formatMonth(month.month_key)}</strong>
+            <div class="muted">${month.lesson_count} lessons • ${month.flow_count} flows</div>
+          </div>
+        `).join("")
+        : '<div class="empty">No months available.</div>';
 
       nodes.monthList.querySelectorAll("[data-month]").forEach((item) => {
         item.addEventListener("click", () => {
@@ -1551,7 +1581,7 @@
       nodes.lessonsView.classList.toggle("hidden", state.view !== "lessons");
       nodes.payrollView.classList.toggle("hidden", state.view !== "payroll");
       nodes.studentsView.classList.toggle("hidden", state.view !== "students");
-      nodes.studentSearchCard.style.display = state.view === "students" ? "" : "none";
+      nodes.studentSearchCard.classList.toggle("hidden", state.view !== "students");
 
       document.querySelectorAll("[data-view]").forEach((button) => {
         button.classList.toggle("active", button.dataset.view === state.view);
@@ -1562,6 +1592,7 @@
 
     function render() {
       renderProductFilter();
+      renderMonthFilter();
       renderFlowFilter();
       renderHeader();
       renderMonths();
@@ -1585,10 +1616,15 @@
 
     nodes.productFilter.addEventListener("change", (event) => {
       state.product = event.target.value;
-      state.month = "";
+      state.month = getDefaultMonthForProduct(state.product);
       state.flow = "";
       state.studentQuery = "";
       nodes.studentSearch.value = "";
+      render();
+    });
+
+    nodes.monthFilter.addEventListener("change", (event) => {
+      state.month = event.target.value;
       render();
     });
 
@@ -1619,6 +1655,7 @@
           throw new Error("dashboard_data.json загружен, но products пустой");
         }
         state.product = products[0];
+        state.month = getDefaultMonthForProduct(state.product);
         render();
       })
       .catch((error) => {
